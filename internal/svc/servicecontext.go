@@ -4,8 +4,8 @@
 package svc
 
 import (
-	"database/sql"
-
+	"github.com/zeromicro/go-zero/core/stores/cache"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/zeromicro/go-zero/rest"
 
 	"github.com/relayx-tech/panel/internal/auth"
@@ -18,8 +18,9 @@ import (
 // ServiceContext 是组合根：配置、model、会话管理与中间件在启动时构造一次。
 type ServiceContext struct {
 	Config         config.Config
-	DB             *sql.DB
+	DB             sqlx.SqlConn
 	UserModel      model.AuthUserModel
+	SessionModel   model.AuthSessionModel
 	SessionManager *auth.SessionManager
 
 	OriginCheck    rest.Middleware
@@ -27,9 +28,9 @@ type ServiceContext struct {
 	Auth           rest.Middleware
 }
 
-func NewServiceContext(c config.Config, db *sql.DB) *ServiceContext {
-	users := model.NewAuthUserModel(db)
-	sessions := model.NewAuthSessionModel(db)
+func NewServiceContext(c config.Config, conn sqlx.SqlConn, cacheConf cache.CacheConf) *ServiceContext {
+	users := model.NewAuthUserModel(conn, cacheConf)
+	sessions := model.NewAuthSessionModel(conn, cacheConf, users)
 	manager := auth.NewSessionManager(sessions, c.Auth.SessionIdleTTL, c.Auth.SessionAbsoluteTTL, c.Auth.SessionTouchInterval)
 
 	rateLimiter := middleware.NewLoginRateLimitMiddleware(
@@ -39,8 +40,9 @@ func NewServiceContext(c config.Config, db *sql.DB) *ServiceContext {
 
 	return &ServiceContext{
 		Config:         c,
-		DB:             db,
+		DB:             conn,
 		UserModel:      users,
+		SessionModel:   sessions,
 		SessionManager: manager,
 		OriginCheck:    middleware.NewOriginCheckMiddleware(c.Auth.AllowedOrigins).Handle,
 		LoginRateLimit: rateLimiter.Handle,

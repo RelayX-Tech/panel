@@ -7,6 +7,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
+
 	"github.com/relayx-tech/panel/internal/model"
 )
 
@@ -26,7 +28,7 @@ func newFakeSessionModel() *fakeSessionModel {
 	return &fakeSessionModel{rows: map[string]*model.SessionWithUser{}}
 }
 
-func (f *fakeSessionModel) Create(_ context.Context, s *model.Session) error {
+func (f *fakeSessionModel) Create(_ context.Context, _ sqlx.Session, s *model.Session) error {
 	s.ID = "sess-1"
 	f.rows[string(s.SessionHash)] = &model.SessionWithUser{
 		Session: *s,
@@ -44,7 +46,7 @@ func (f *fakeSessionModel) FindByHash(_ context.Context, hash []byte) (*model.Se
 	return &cp, nil
 }
 
-func (f *fakeSessionModel) Touch(_ context.Context, id string, lastSeen, expiresAt time.Time) error {
+func (f *fakeSessionModel) Touch(_ context.Context, _ sqlx.Session, id string, lastSeen, expiresAt time.Time) error {
 	f.touches = append(f.touches, touchRecord{ID: id, LastSeen: lastSeen, ExpiresAt: expiresAt})
 	for _, row := range f.rows {
 		if row.Session.ID == id {
@@ -55,12 +57,12 @@ func (f *fakeSessionModel) Touch(_ context.Context, id string, lastSeen, expires
 	return nil
 }
 
-func (f *fakeSessionModel) RevokeByHash(_ context.Context, hash []byte) error {
+func (f *fakeSessionModel) RevokeByHash(_ context.Context, _ sqlx.Session, hash []byte) error {
 	f.revoked = append(f.revoked, string(hash))
 	return nil
 }
 
-func (f *fakeSessionModel) DeleteExpiredBefore(context.Context, time.Time) (int64, error) {
+func (f *fakeSessionModel) DeleteExpiredBefore(context.Context, sqlx.Session, time.Time) (int64, error) {
 	return 0, nil
 }
 
@@ -75,7 +77,7 @@ func TestSessionManagerCreateStoresOnlyHash(t *testing.T) {
 	now := time.Date(2026, 11, 19, 8, 0, 0, 0, time.UTC)
 	m := newTestManager(f, now)
 
-	token, sess, err := m.Create(context.Background(), "user-1", "10.0.0.1", "ua")
+	token, sess, err := m.Create(context.Background(), nil, "user-1", "10.0.0.1", "ua")
 	if err != nil {
 		t.Fatalf("create: %v", err)
 	}
@@ -100,7 +102,7 @@ func TestSessionManagerAuthenticate(t *testing.T) {
 	f := newFakeSessionModel()
 	now := time.Now().UTC()
 	m := newTestManager(f, now)
-	token, _, _ := m.Create(context.Background(), "user-1", "", "")
+	token, _, _ := m.Create(context.Background(), nil, "user-1", "", "")
 
 	got, err := m.Authenticate(context.Background(), token)
 	if err != nil {
@@ -127,7 +129,7 @@ func TestSessionManagerAuthenticateRejectsInvalidStates(t *testing.T) {
 			f := newFakeSessionModel()
 			now := time.Now().UTC()
 			m := newTestManager(f, now)
-			token, _, _ := m.Create(context.Background(), "user-1", "", "")
+			token, _, _ := m.Create(context.Background(), nil, "user-1", "", "")
 			row := f.rows[string(HashSessionToken(token))]
 			mutate(row)
 
@@ -142,7 +144,7 @@ func TestSessionManagerTouchesAfterInterval(t *testing.T) {
 	f := newFakeSessionModel()
 	now := time.Now().UTC()
 	m := newTestManager(f, now)
-	token, _, _ := m.Create(context.Background(), "user-1", "", "")
+	token, _, _ := m.Create(context.Background(), nil, "user-1", "", "")
 
 	// 刚创建：不 touch
 	if _, err := m.Authenticate(context.Background(), token); err != nil {
@@ -188,9 +190,9 @@ func TestSessionManagerTouchesAfterInterval(t *testing.T) {
 func TestSessionManagerRevoke(t *testing.T) {
 	f := newFakeSessionModel()
 	m := newTestManager(f, time.Now().UTC())
-	token, _, _ := m.Create(context.Background(), "user-1", "", "")
+	token, _, _ := m.Create(context.Background(), nil, "user-1", "", "")
 
-	if err := m.Revoke(context.Background(), token); err != nil {
+	if err := m.Revoke(context.Background(), nil, token); err != nil {
 		t.Fatalf("revoke: %v", err)
 	}
 	if len(f.revoked) != 1 || f.revoked[0] != string(HashSessionToken(token)) {

@@ -18,6 +18,7 @@ func migrateUp(ctx context.Context, db *sql.DB) error {
 
 func migratedDB(t *testing.T) *sql.DB {
 	t.Helper()
+	testsupport.RequireRedis(t)
 	db := testsupport.NewPostgres(t)
 	if err := migrateUp(context.Background(), db); err != nil {
 		t.Fatalf("migrate: %v", err)
@@ -25,12 +26,20 @@ func migratedDB(t *testing.T) *sql.DB {
 	return db
 }
 
+// newModels 构造用户 / 会话适配层（共享连接与 sqlcache 配置）。
+func newModels(t *testing.T) (*PostgresAuthUserModel, *PostgresAuthSessionModel) {
+	t.Helper()
+	conn := testsupport.Conn(migratedDB(t))
+	users := NewAuthUserModel(conn, testsupport.CacheConf())
+	return users, NewAuthSessionModel(conn, testsupport.CacheConf(), users)
+}
+
 func TestUserCreateAndFindCaseInsensitive(t *testing.T) {
-	db := migratedDB(t)
-	m := NewAuthUserModel(db)
+	users, _ := newModels(t)
+	m := users
 	ctx := context.Background()
 
-	u, err := m.Create(ctx, "Admin", "$argon2id$dummy", "Administrator")
+	u, err := m.Create(ctx, nil, "Admin", "$argon2id$dummy", "Administrator")
 	if err != nil {
 		t.Fatalf("create: %v", err)
 	}
@@ -55,42 +64,40 @@ func TestUserCreateAndFindCaseInsensitive(t *testing.T) {
 }
 
 func TestUserAccountUniqueCaseInsensitive(t *testing.T) {
-	db := migratedDB(t)
-	m := NewAuthUserModel(db)
+	users, _ := newModels(t)
+	m := users
 	ctx := context.Background()
 
-	if _, err := m.Create(ctx, "admin", "hash1", ""); err != nil {
+	if _, err := m.Create(ctx, nil, "admin", "hash1", ""); err != nil {
 		t.Fatalf("create: %v", err)
 	}
-	if _, err := m.Create(ctx, "ADMIN", "hash2", ""); err == nil {
+	if _, err := m.Create(ctx, nil, "ADMIN", "hash2", ""); err == nil {
 		t.Fatal("duplicate account with different case was accepted")
 	}
 }
 
 func TestUserCount(t *testing.T) {
-	db := migratedDB(t)
-	m := NewAuthUserModel(db)
+	users, _ := newModels(t)
+	m := users
 	ctx := context.Background()
 
-	n, err := m.Count(ctx)
+	n, err := m.Count(ctx, nil)
 	if err != nil || n != 0 {
 		t.Fatalf("count = %d, %v; want 0", n, err)
 	}
-	if _, err := m.Create(ctx, "admin", "hash", ""); err != nil {
+	if _, err := m.Create(ctx, nil, "admin", "hash", ""); err != nil {
 		t.Fatalf("create: %v", err)
 	}
-	if n, _ := m.Count(ctx); n != 1 {
+	if n, _ := m.Count(ctx, nil); n != 1 {
 		t.Fatalf("count = %d, want 1", n)
 	}
 }
 
 func TestSessionLifecycle(t *testing.T) {
-	db := migratedDB(t)
-	users := NewAuthUserModel(db)
-	sessions := NewAuthSessionModel(db)
+	users, sessions := newModels(t)
 	ctx := context.Background()
 
-	u, err := users.Create(ctx, "admin", "hash", "")
+	u, err := users.Create(ctx, nil, "admin", "hash", "")
 	if err != nil {
 		t.Fatalf("create user: %v", err)
 	}
@@ -110,7 +117,7 @@ func TestSessionLifecycle(t *testing.T) {
 		ClientIP:          "127.0.0.1",
 		UserAgent:         "test-agent",
 	}
-	if err := sessions.Create(ctx, s); err != nil {
+	if err := sessions.Create(ctx, nil, s); err != nil {
 		t.Fatalf("create session: %v", err)
 	}
 
@@ -129,7 +136,7 @@ func TestSessionLifecycle(t *testing.T) {
 	}
 
 	newExpiry := now.Add(48 * time.Hour)
-	if err := sessions.Touch(ctx, s.ID, now.Add(time.Minute), newExpiry); err != nil {
+	if err := sessions.Touch(ctx, nil, s.ID, now.Add(time.Minute), newExpiry); err != nil {
 		t.Fatalf("touch: %v", err)
 	}
 	got, _ = sessions.FindByHash(ctx, hash)
@@ -140,7 +147,7 @@ func TestSessionLifecycle(t *testing.T) {
 		t.Errorf("lastSeenAt = %v", got.Session.LastSeenAt)
 	}
 
-	if err := sessions.RevokeByHash(ctx, hash); err != nil {
+	if err := sessions.RevokeByHash(ctx, nil, hash); err != nil {
 		t.Fatalf("revoke: %v", err)
 	}
 	got, _ = sessions.FindByHash(ctx, hash)
@@ -150,20 +157,17 @@ func TestSessionLifecycle(t *testing.T) {
 }
 
 func TestSessionFindMissing(t *testing.T) {
-	db := migratedDB(t)
-	sessions := NewAuthSessionModel(db)
+	_, sessions := newModels(t)
 	if _, err := sessions.FindByHash(context.Background(), []byte("not-a-session")); !errors.Is(err, ErrNotFound) {
 		t.Errorf("error = %v, want ErrNotFound", err)
 	}
 }
 
 func TestDeleteExpiredSessions(t *testing.T) {
-	db := migratedDB(t)
-	users := NewAuthUserModel(db)
-	sessions := NewAuthSessionModel(db)
+	users, sessions := newModels(t)
 	ctx := context.Background()
 
-	u, _ := users.Create(ctx, "admin", "hash", "")
+	u, _ := users.Create(ctx, nil, "admin", "hash", "")
 	now := time.Now().UTC()
 
 	mk := func(hash byte, expires time.Time) {
@@ -175,14 +179,14 @@ func TestDeleteExpiredSessions(t *testing.T) {
 			ExpiresAt:         expires,
 			AbsoluteExpiresAt: now.Add(168 * time.Hour),
 		}
-		if err := sessions.Create(ctx, s); err != nil {
+		if err := sessions.Create(ctx, nil, s); err != nil {
 			t.Fatalf("create session: %v", err)
 		}
 	}
 	mk(1, now.Add(-8*24*time.Hour)) // 超期 7 天以上，应删除
 	mk(2, now.Add(-time.Hour))      // 已过期但保留窗口内
 
-	deleted, err := sessions.DeleteExpiredBefore(ctx, now.Add(-7*24*time.Hour))
+	deleted, err := sessions.DeleteExpiredBefore(ctx, nil, now.Add(-7*24*time.Hour))
 	if err != nil {
 		t.Fatalf("delete expired: %v", err)
 	}

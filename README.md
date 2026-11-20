@@ -49,6 +49,22 @@ go test ./...
 
 集成测试会为每个用例创建独立 schema 并自动清理；数据库不可达时跳过。
 
+## 数据模型生成物
+
+`internal/model` 下的 `authusersmodel*.go`、`authsessionsmodel*.go`、`vars.go` 由 **goctl 1.10.2** 生成并入库，禁止手改；重新生成必须零差异。
+
+```bash
+# 生成前需对临时库执行迁移（goctl 需要连接真实表结构）
+goctl model pg datasource -url="$DSN" -table=auth_users -dir=internal/model -cache
+
+# goctl 1.10.2 的 PostgreSQL 生成器不支持 inet 列；生成 auth_sessions 前，
+# 在临时库把 client_ip 转为 text（仅用于生成，生产 schema 不变）：
+#   ALTER TABLE auth_sessions ALTER COLUMN client_ip TYPE text USING host(client_ip);
+goctl model pg datasource -url="$DSN" -table=auth_sessions -dir=internal/model -cache
+```
+
+手写代码与生成物的边界（design.md §5.1.1）：`auth_types.go`（领域类型）、`auth_repository.go`（适配层）、`auth_queries_ext.go`（扩展查询）由人工维护。
+
 ## 契约与生成物
 
 ```bash

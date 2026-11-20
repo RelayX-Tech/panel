@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
+
 	"github.com/relayx-tech/panel/internal/model"
 )
 
@@ -35,7 +37,8 @@ func NewSessionManager(sessions model.AuthSessionModel, idleTTL, absoluteTTL, to
 }
 
 // Create 生成并持久化新会话；返回的明文 token 仅用于写入 Cookie。
-func (m *SessionManager) Create(ctx context.Context, userID, clientIP, userAgent string) (string, *model.Session, error) {
+// session 为 nil 时使用连接池，非 nil 时加入调用方事务。
+func (m *SessionManager) Create(ctx context.Context, session sqlx.Session, userID, clientIP, userAgent string) (string, *model.Session, error) {
 	token, err := GenerateSessionToken()
 	if err != nil {
 		return "", nil, fmt.Errorf("generate session token: %w", err)
@@ -52,7 +55,7 @@ func (m *SessionManager) Create(ctx context.Context, userID, clientIP, userAgent
 		ClientIP:          clientIP,
 		UserAgent:         userAgent,
 	}
-	if err := m.Sessions.Create(ctx, sess); err != nil {
+	if err := m.Sessions.Create(ctx, session, sess); err != nil {
 		return "", nil, err
 	}
 	return token, sess, nil
@@ -86,7 +89,7 @@ func (m *SessionManager) Authenticate(ctx context.Context, token string) (*model
 
 	if ShouldTouch(row.Session.LastSeenAt, now, m.TouchInterval) {
 		expiresAt, _ := NewSessionExpiry(now, row.Session.CreatedAt, m.IdleTTL, m.AbsoluteTTL)
-		if err := m.Sessions.Touch(ctx, row.Session.ID, now, expiresAt); err != nil {
+		if err := m.Sessions.Touch(ctx, nil, row.Session.ID, now, expiresAt); err != nil {
 			return nil, err
 		}
 		row.Session.LastSeenAt = now
@@ -96,16 +99,16 @@ func (m *SessionManager) Authenticate(ctx context.Context, token string) (*model
 }
 
 // Revoke 吊销会话；token 为空或无对应会话时视为成功（幂等）。
-func (m *SessionManager) Revoke(ctx context.Context, token string) error {
+func (m *SessionManager) Revoke(ctx context.Context, session sqlx.Session, token string) error {
 	if token == "" {
 		return nil
 	}
-	return m.Sessions.RevokeByHash(ctx, HashSessionToken(token))
+	return m.Sessions.RevokeByHash(ctx, session, HashSessionToken(token))
 }
 
 // Cleanup 删除过期超过 retention 的会话行。
-func (m *SessionManager) Cleanup(ctx context.Context, retention time.Duration) (int64, error) {
-	return m.Sessions.DeleteExpiredBefore(ctx, m.Now().Add(-retention))
+func (m *SessionManager) Cleanup(ctx context.Context, session sqlx.Session, retention time.Duration) (int64, error) {
+	return m.Sessions.DeleteExpiredBefore(ctx, session, m.Now().Add(-retention))
 }
 
 type sessionCtxKey struct{}

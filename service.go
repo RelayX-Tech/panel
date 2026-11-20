@@ -13,6 +13,7 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/proc"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/zeromicro/go-zero/rest"
 
 	"github.com/relayx-tech/panel/internal/config"
@@ -55,6 +56,9 @@ func main() {
 	}
 	defer db.Close()
 
+	// 业务连接复用同一连接池（design.md §5.1.3）：openDatabase 保留给迁移 / bootstrap 例外。
+	conn := sqlx.NewSqlConnFromDB(db)
+
 	startupCtx, cancel := context.WithTimeout(context.Background(), startupTimeout)
 	defer cancel()
 
@@ -62,7 +66,7 @@ func main() {
 		log.Fatalf("schema not ready: %v (run `panel migrate up`)", err)
 	}
 
-	res, err := svc.BootstrapAdminFromEnv(startupCtx, db, model.NewAuthUserModel(db))
+	res, err := svc.BootstrapAdminFromEnv(startupCtx, db, model.NewAuthUserModel(conn, c.Cache))
 	if err != nil {
 		log.Fatalf("bootstrap admin: %v", err)
 	}
@@ -94,7 +98,7 @@ func main() {
 		}, migrate.ReadyCheck(db, migrations.FS))},
 	})
 
-	svcCtx := svc.NewServiceContext(c, db)
+	svcCtx := svc.NewServiceContext(c, conn, c.Cache)
 	handler.RegisterHandlers(server, svcCtx)
 
 	startSessionCleanup(svcCtx)
@@ -202,7 +206,7 @@ func startSessionCleanup(svcCtx *svc.ServiceContext) {
 		for {
 			select {
 			case <-ticker.C:
-				n, err := svcCtx.SessionManager.Cleanup(context.Background(), sessionRetention)
+				n, err := svcCtx.SessionManager.Cleanup(context.Background(), nil, sessionRetention)
 				if err != nil {
 					logx.Errorw("session cleanup failed", logx.Field("error", err.Error()))
 					continue

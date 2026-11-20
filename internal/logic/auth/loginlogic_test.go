@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
+
 	"github.com/relayx-tech/panel/internal/auth"
 	"github.com/relayx-tech/panel/internal/config"
 	"github.com/relayx-tech/panel/internal/model"
@@ -21,8 +23,19 @@ type fakeUsers struct {
 	users []*model.User
 }
 
-func (f *fakeUsers) Create(_ context.Context, account, hash, display string) (*model.User, error) {
+func (f *fakeUsers) Create(_ context.Context, _ sqlx.Session, account, hash, display string) (*model.User, error) {
 	return &model.User{Account: account, PasswordHash: hash, DisplayName: display}, nil
+}
+
+func (f *fakeUsers) FindOne(context.Context, string) (*model.User, error) {
+	if f.err != nil {
+		return nil, f.err
+	}
+	if f.user == nil {
+		return nil, model.ErrNotFound
+	}
+	cp := *f.user
+	return &cp, nil
 }
 
 func (f *fakeUsers) FindByAccount(context.Context, string) (*model.User, error) {
@@ -36,7 +49,7 @@ func (f *fakeUsers) FindByAccount(context.Context, string) (*model.User, error) 
 	return &cp, nil
 }
 
-func (f *fakeUsers) Count(context.Context) (int64, error) { return 0, nil }
+func (f *fakeUsers) Count(context.Context, sqlx.Session) (int64, error) { return 0, nil }
 
 type fakeSessions struct {
 	created []*model.Session
@@ -49,7 +62,7 @@ func newFakeSessions() *fakeSessions {
 	return &fakeSessions{rows: map[string]*model.SessionWithUser{}}
 }
 
-func (f *fakeSessions) Create(_ context.Context, s *model.Session) error {
+func (f *fakeSessions) Create(_ context.Context, _ sqlx.Session, s *model.Session) error {
 	s.ID = "sess-1"
 	f.created = append(f.created, s)
 	return nil
@@ -64,17 +77,19 @@ func (f *fakeSessions) FindByHash(_ context.Context, hash []byte) (*model.Sessio
 	return &cp, nil
 }
 
-func (f *fakeSessions) Touch(context.Context, string, time.Time, time.Time) error {
+func (f *fakeSessions) Touch(context.Context, sqlx.Session, string, time.Time, time.Time) error {
 	f.touched++
 	return nil
 }
 
-func (f *fakeSessions) RevokeByHash(context.Context, []byte) error {
+func (f *fakeSessions) RevokeByHash(context.Context, sqlx.Session, []byte) error {
 	f.revoked++
 	return nil
 }
 
-func (f *fakeSessions) DeleteExpiredBefore(context.Context, time.Time) (int64, error) { return 0, nil }
+func (f *fakeSessions) DeleteExpiredBefore(context.Context, sqlx.Session, time.Time) (int64, error) {
+	return 0, nil
+}
 
 func newAuthSvc(t *testing.T, users *fakeUsers) (*svc.ServiceContext, *fakeSessions) {
 	t.Helper()

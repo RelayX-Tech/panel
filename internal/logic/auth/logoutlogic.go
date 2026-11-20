@@ -31,7 +31,7 @@ func NewLogoutLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LogoutLogi
 
 // Logout 吊销 token 对应会话；无会话时同样返回成功（幂等）。
 func (l *LogoutLogic) Logout(token string) (resp *types.LogoutResp, err error) {
-	if err := l.svcCtx.SessionManager.Revoke(l.ctx, token); err != nil {
+	if err := l.svcCtx.SessionManager.Revoke(l.ctx, nil, token); err != nil {
 		l.Errorw("auth.logout", logx.Field("requestId", requestid.FromContext(l.ctx)),
 			logx.Field("result", "failure"))
 		return nil, response.Internal(err)

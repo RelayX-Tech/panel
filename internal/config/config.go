@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/zeromicro/go-zero/core/conf"
+	"github.com/zeromicro/go-zero/core/stores/cache"
 	"github.com/zeromicro/go-zero/rest"
 )
 
@@ -13,8 +14,9 @@ import (
 type Config struct {
 	rest.RestConf
 
-	Auth     AuthConf     `json:"Auth"`
-	Database DatabaseConf `json:"Database,optional"`
+	Auth     AuthConf        `json:"Auth"`
+	Database DatabaseConf    `json:"Database,optional"`
+	Cache    cache.CacheConf `json:"Cache,optional"`
 }
 
 // AuthConf 管理面认证与会话相关配置（design.md §4.6）。

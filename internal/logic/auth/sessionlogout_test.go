@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
+
 	"github.com/relayx-tech/panel/internal/auth"
 	"github.com/relayx-tech/panel/internal/model"
 	"github.com/relayx-tech/panel/internal/response"
@@ -13,7 +15,7 @@ import (
 
 type failingSessions struct{ fakeSessions }
 
-func (f *failingSessions) RevokeByHash(context.Context, []byte) error {
+func (f *failingSessions) RevokeByHash(context.Context, sqlx.Session, []byte) error {
 	return errors.New("db unavailable")
 }
 

@@ -23,3 +23,8 @@ Database:
   MaxOpenConns: 20
   MaxIdleConns: 10
   ConnMaxLifetime: 1h
+
+# sqlcache 后端（与 compose.dev.yml 的 redis:7.4 / 端口 56379 对齐）。
+Cache:
+  - Host: 127.0.0.1:56379
+    Type: node

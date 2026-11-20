@@ -84,7 +84,7 @@ func (l *LoginLogic) Login(req *types.LoginReq, clientIP, userAgent string) (*ty
 		return nil, "", response.InvalidCredentials()
 	}
 
-	token, sess, err := l.svcCtx.SessionManager.Create(l.ctx, user.ID, clientIP, truncate(userAgent, 512))
+	token, sess, err := l.svcCtx.SessionManager.Create(l.ctx, nil, user.ID, clientIP, truncate(userAgent, 512))
 	if err != nil {
 		l.Errorw("auth.login.failure", logx.Field("requestId", requestid.FromContext(l.ctx)),
 			logx.Field("userHash", observability.UserHash(account)), logx.Field("reason", "session_create"))

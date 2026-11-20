@@ -49,11 +49,12 @@ type testEnv struct {
 
 func newTestEnv(t *testing.T) *testEnv {
 	t.Helper()
+	testsupport.RequireRedis(t)
 	db := testsupport.NewPostgres(t)
 	if err := migrate.Up(context.Background(), db, migrations.FS); err != nil {
 		t.Fatalf("migrate: %v", err)
 	}
-	svcCtx := svc.NewServiceContext(testConfig(), db)
+	svcCtx := svc.NewServiceContext(testConfig(), testsupport.Conn(db), testsupport.CacheConf())
 	response.InstallErrorHandler()
 
 	loginChain := chain(handlerLogin(svcCtx), svcCtx.OriginCheck, svcCtx.LoginRateLimit)
@@ -96,7 +97,8 @@ func (e *testEnv) createAdmin(t *testing.T, account, password string, disabled b
 	if err != nil {
 		t.Fatalf("hash: %v", err)
 	}
-	u, err := model.NewAuthUserModel(e.db).Create(context.Background(), account, hash, "Administrator")
+	users := model.NewAuthUserModel(testsupport.Conn(e.db), testsupport.CacheConf())
+	u, err := users.Create(context.Background(), nil, account, hash, "Administrator")
 	if err != nil {
 		t.Fatalf("create user: %v", err)
 	}

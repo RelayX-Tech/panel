@@ -68,7 +68,7 @@ func BootstrapAdmin(ctx context.Context, db *sql.DB, users model.AuthUserModel, 
 	if err != nil {
 		return AdminBootstrapResult{}, fmt.Errorf("hash admin password: %w", err)
 	}
-	if _, err := users.Create(ctx, account, hash, "Administrator"); err != nil {
+	if _, err := users.Create(ctx, nil, account, hash, "Administrator"); err != nil {
 		return AdminBootstrapResult{}, fmt.Errorf("create admin: %w", err)
 	}
 	return AdminBootstrapResult{Created: true, Account: account}, nil

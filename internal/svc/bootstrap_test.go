@@ -14,6 +14,7 @@ import (
 
 func bootstrapDB(t *testing.T) *sql.DB {
 	t.Helper()
+	testsupport.RequireRedis(t)
 	db := testsupport.NewPostgres(t)
 	if err := migrate.Up(context.Background(), db, migrations.FS); err != nil {
 		t.Fatalf("migrate: %v", err)
@@ -21,9 +22,15 @@ func bootstrapDB(t *testing.T) *sql.DB {
 	return db
 }
 
+// newUserModel 构造走 sqlcache 的用户适配层（需要测试 Redis）。
+func newUserModel(t *testing.T, db *sql.DB) model.AuthUserModel {
+	t.Helper()
+	return model.NewAuthUserModel(testsupport.Conn(db), testsupport.CacheConf())
+}
+
 func TestBootstrapAdminCreatesOnce(t *testing.T) {
 	db := bootstrapDB(t)
-	users := model.NewAuthUserModel(db)
+	users := newUserModel(t, db)
 	ctx := context.Background()
 
 	res, err := BootstrapAdmin(ctx, db, users, "admin", "sup3r-secret-pass")
@@ -51,14 +58,14 @@ func TestBootstrapAdminCreatesOnce(t *testing.T) {
 	if res.Created {
 		t.Error("admin was created twice")
 	}
-	if n, _ := users.Count(ctx); n != 1 {
+	if n, _ := users.Count(ctx, nil); n != 1 {
 		t.Errorf("user count = %d, want 1", n)
 	}
 }
 
 func TestBootstrapAdminRejectsShortPassword(t *testing.T) {
 	db := bootstrapDB(t)
-	users := model.NewAuthUserModel(db)
+	users := newUserModel(t, db)
 
 	res, err := BootstrapAdmin(context.Background(), db, users, "admin", "short-pass1")
 	if err == nil {
@@ -67,14 +74,14 @@ func TestBootstrapAdminRejectsShortPassword(t *testing.T) {
 	if res.Created {
 		t.Error("admin created with short password")
 	}
-	if n, _ := users.Count(context.Background()); n != 0 {
+	if n, _ := users.Count(context.Background(), nil); n != 0 {
 		t.Errorf("user count = %d, want 0", n)
 	}
 }
 
 func TestBootstrapAdminSkipsWhenUsersExist(t *testing.T) {
 	db := bootstrapDB(t)
-	users := model.NewAuthUserModel(db)
+	users := newUserModel(t, db)
 
 	if _, err := BootstrapAdmin(context.Background(), db, users, "admin", "sup3r-secret-pass"); err != nil {
 		t.Fatalf("first bootstrap: %v", err)
@@ -93,7 +100,7 @@ func TestBootstrapAdminSkipsWhenUsersExist(t *testing.T) {
 
 func TestBootstrapAdminMissingEnv(t *testing.T) {
 	db := bootstrapDB(t)
-	users := model.NewAuthUserModel(db)
+	users := newUserModel(t, db)
 
 	t.Setenv("RELAYX_ADMIN_ACCOUNT", "")
 	t.Setenv("RELAYX_ADMIN_PASSWORD", "")
@@ -112,7 +119,7 @@ func TestBootstrapAdminMissingEnv(t *testing.T) {
 
 func TestBootstrapAdminConcurrent(t *testing.T) {
 	db := bootstrapDB(t)
-	users := model.NewAuthUserModel(db)
+	users := newUserModel(t, db)
 
 	errs := make(chan error, 2)
 	for i := 0; i < 2; i++ {
@@ -126,7 +133,7 @@ func TestBootstrapAdminConcurrent(t *testing.T) {
 			t.Fatalf("concurrent bootstrap: %v", err)
 		}
 	}
-	if n, _ := users.Count(context.Background()); n != 1 {
+	if n, _ := users.Count(context.Background(), nil); n != 1 {
 		t.Errorf("user count = %d, want 1", n)
 	}
 }

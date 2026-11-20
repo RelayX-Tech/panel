@@ -1,0 +1,72 @@
+- code: OK
+  http: 200
+  i18n: errors.OK
+  owner: backend-panel
+  since: "2026-11-19"
+  deprecated: false
+  message: "成功"
+  messageEn: "Success"
+- code: VALIDATION_MISSING_FIELD
+  http: 400
+  i18n: errors.VALIDATION_MISSING_FIELD
+  owner: backend-panel
+  since: "2026-11-19"
+  deprecated: false
+  message: "必填字段缺失"
+  messageEn: "Required field is missing"
+- code: VALIDATION_INVALID_FIELD
+  http: 400
+  i18n: errors.VALIDATION_INVALID_FIELD
+  owner: backend-panel
+  since: "2026-11-19"
+  deprecated: false
+  message: "字段格式非法"
+  messageEn: "Invalid field"
+- code: AUTH_INVALID_CREDENTIALS
+  http: 401
+  i18n: errors.AUTH_INVALID_CREDENTIALS
+  owner: backend-panel
+  since: "2026-11-19"
+  deprecated: false
+  message: "账号或密码错误"
+  messageEn: "Incorrect account or password"
+- code: AUTH_UNAUTHORIZED
+  http: 401
+  i18n: errors.AUTH_UNAUTHORIZED
+  owner: backend-panel
+  since: "2026-11-19"
+  deprecated: false
+  message: "未认证"
+  messageEn: "Authentication required"
+- code: AUTH_SESSION_EXPIRED
+  http: 401
+  i18n: errors.AUTH_SESSION_EXPIRED
+  owner: backend-panel
+  since: "2026-11-19"
+  deprecated: false
+  message: "会话已过期"
+  messageEn: "Session expired, please sign in again"
+- code: AUTH_CSRF_REJECTED
+  http: 403
+  i18n: errors.AUTH_CSRF_REJECTED
+  owner: backend-panel
+  since: "2026-11-19"
+  deprecated: false
+  message: "请求被拒绝"
+  messageEn: "Request rejected"
+- code: RATE_LIMITED
+  http: 429
+  i18n: errors.RATE_LIMITED
+  owner: backend-panel
+  since: "2026-11-19"
+  deprecated: false
+  message: "请求过于频繁"
+  messageEn: "Too many attempts, please try again later"
+- code: INTERNAL
+  http: 500
+  i18n: errors.INTERNAL
+  owner: backend-panel
+  since: "2026-11-19"
+  deprecated: false
+  message: "服务内部错误"
+  messageEn: "Internal server error"

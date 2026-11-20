@@ -1,0 +1,228 @@
+{
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "schemes": [
+    "https"
+  ],
+  "swagger": "2.0",
+  "info": {
+    "title": "Panel API",
+    "version": "v1"
+  },
+  "basePath": "/",
+  "paths": {
+    "/api/v1/auth/login": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "账号密码登录",
+        "operationId": "authLogin",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "account",
+                "password"
+              ],
+              "properties": {
+                "account": {
+                  "type": "string"
+                },
+                "password": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "user",
+                    "session"
+                  ],
+                  "properties": {
+                    "session": {
+                      "type": "object",
+                      "required": [
+                        "expiresAt",
+                        "absoluteExpiresAt"
+                      ],
+                      "properties": {
+                        "absoluteExpiresAt": {
+                          "type": "string"
+                        },
+                        "expiresAt": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "user": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "account",
+                        "displayName"
+                      ],
+                      "properties": {
+                        "account": {
+                          "type": "string"
+                        },
+                        "displayName": {
+                          "type": "string"
+                        },
+                        "id": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "注销当前会话（幂等）",
+        "operationId": "authLogout",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {},
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/session": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "读取当前会话",
+        "operationId": "authSession",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "user",
+                    "session"
+                  ],
+                  "properties": {
+                    "session": {
+                      "type": "object",
+                      "required": [
+                        "expiresAt",
+                        "absoluteExpiresAt"
+                      ],
+                      "properties": {
+                        "absoluteExpiresAt": {
+                          "type": "string"
+                        },
+                        "expiresAt": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "user": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "account",
+                        "displayName"
+                      ],
+                      "properties": {
+                        "account": {
+                          "type": "string"
+                        },
+                        "displayName": {
+                          "type": "string"
+                        },
+                        "id": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "x-description": "This is a goctl generated swagger file.",
+  "x-github": "https://github.com/zeromicro/go-zero",
+  "x-go-zero-doc": "https://go-zero.dev/",
+  "x-goctl-version": "1.10.2"
+}

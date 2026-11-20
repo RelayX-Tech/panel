@@ -1,0 +1,10 @@
+# binaries and local artifacts
+/panel
+/panel.exe
+/coverage
+/coverage.out
+*.test
+*.prof
+
+# local env
+.env

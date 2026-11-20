@@ -1,0 +1,25 @@
+Name: panel-api
+Host: 0.0.0.0
+Port: 8888
+
+Auth:
+  SessionCookieName: relayx_session
+  SessionIdleTTL: 24h
+  SessionAbsoluteTTL: 168h
+  SessionTouchInterval: 5m
+  CookieSecure: true          # 开发环境置 false
+  AllowedOrigins:
+    - http://localhost:3000
+    - http://127.0.0.1:3000
+  LoginRateLimit:
+    Window: 60s
+    MaxAttempts: 10
+  TrustProxyHeaders: false    # 启用时按 TrustedProxyCIDRs 解析 X-Forwarded-For
+  TrustedProxyCIDRs: []
+
+Database:
+  # 生产环境经环境变量 RELAYX_DB_DSN 覆盖，不提交真实凭据。
+  DataSource: postgres://relayx:relayx@127.0.0.1:55432/relayx?sslmode=disable
+  MaxOpenConns: 20
+  MaxIdleConns: 10
+  ConnMaxLifetime: 1h

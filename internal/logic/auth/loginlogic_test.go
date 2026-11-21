@@ -5,6 +5,7 @@ import (
 	"errors"
 	"testing"
 	"time"
+	"unicode/utf8"
 
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 
@@ -257,6 +258,21 @@ func TestLoginInternalError(t *testing.T) {
 	}
 	if appErr.Message == "db connection refused" {
 		t.Error("internal error detail leaked in message")
+	}
+}
+
+func TestTruncateKeepsValidUTF8(t *testing.T) {
+	// 每个汉字 3 字节；512 不是 3 的倍数，按字节硬截断会切断最后一个字符，
+	// Postgres 的 varchar 会因非法 UTF-8 拒绝写入，导致登录 500。
+	got := truncate(repeat("中", 200), 512)
+	if !utf8.ValidString(got) {
+		t.Fatalf("truncate produced invalid UTF-8: %q", got)
+	}
+	if len(got) > 512 {
+		t.Fatalf("len = %d, want <= 512", len(got))
+	}
+	if len(got) != 510 {
+		t.Fatalf("len = %d, want 510（170 个完整汉字）", len(got))
 	}
 }
 

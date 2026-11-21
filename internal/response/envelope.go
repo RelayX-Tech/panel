@@ -136,6 +136,19 @@ func InvalidField(field, message string) *AppError {
 	}
 }
 
+// InvalidRequest 把请求体解析失败映射为 400 VALIDATION_INVALID_FIELD，
+// 避免畸形 / 空 body 穿透成 500 INTERNAL（design.md §3.6）。
+func InvalidRequest(err error) *AppError {
+	return &AppError{
+		Status:  errcode.HTTPStatus[errcode.VALIDATION_INVALID_FIELD],
+		Code:    errcode.VALIDATION_INVALID_FIELD,
+		Message: "invalid request body",
+		Field:   "body",
+		Details: []FieldError{{Field: "body", Code: "INVALID", Message: "request body is not valid JSON"}},
+		Err:     err,
+	}
+}
+
 func RateLimited(retryAfterSeconds int) *AppError {
 	return &AppError{Status: errcode.HTTPStatus[errcode.RATE_LIMITED], Code: errcode.RATE_LIMITED, Message: "too many attempts"}
 }

@@ -124,9 +124,17 @@ func formatTime(t time.Time) string {
 	return t.UTC().Format("2006-01-02T15:04:05.000Z07:00")
 }
 
+// truncate 按字节上限截断，但回退到 rune 边界：硬切会切断多字节字符，
+// Postgres 的 varchar 因非法 UTF-8 拒绝写入，导致登录 500。
 func truncate(s string, max int) string {
+	if max <= 0 {
+		return ""
+	}
 	if len(s) <= max {
 		return s
+	}
+	for max > 0 && !utf8.RuneStart(s[max]) {
+		max--
 	}
 	return s[:max]
 }

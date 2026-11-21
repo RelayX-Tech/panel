@@ -3,6 +3,18 @@
 
 package types
 
+type ChangePasswordReq struct {
+	OldPassword string `json:"oldPassword"`
+	NewPassword string `json:"newPassword"`
+}
+
+type ChangePasswordResp struct {
+	Code      string      `json:"code"`
+	Message   string      `json:"message"`
+	Data      interface{} `json:"data"`
+	RequestId string      `json:"requestId"`
+}
+
 type LoginData struct {
 	User    UserInfo    `json:"user"`
 	Session SessionInfo `json:"session"`

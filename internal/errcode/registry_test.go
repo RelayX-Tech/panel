@@ -9,8 +9,8 @@ func TestLoadRegistry(t *testing.T) {
 	if err != nil {
 		t.Fatalf("load registry: %v", err)
 	}
-	if len(codes) != 9 {
-		t.Fatalf("codes = %d, want 9", len(codes))
+	if len(codes) != 12 {
+		t.Fatalf("codes = %d, want 12", len(codes))
 	}
 
 	seen := map[string]bool{}

@@ -21,21 +21,29 @@ type Config struct {
 
 // AuthConf 管理面认证与会话相关配置（design.md §4.6）。
 type AuthConf struct {
-	SessionCookieName    string             `json:",default=relayx_session"`
-	SessionIdleTTL       time.Duration      `json:",default=24h"`
-	SessionAbsoluteTTL   time.Duration      `json:",default=168h"`
-	SessionTouchInterval time.Duration      `json:",default=5m"`
-	CookieSecure         bool               `json:",default=true"`
-	AllowedOrigins       []string           `json:"AllowedOrigins,optional"`
-	LoginRateLimit       LoginRateLimitConf `json:"LoginRateLimit"`
-	TrustProxyHeaders    bool               `json:",default=false"`
-	TrustedProxyCIDRs    []string           `json:",optional"`
+	SessionCookieName       string                      `json:",default=relayx_session"`
+	SessionIdleTTL          time.Duration               `json:",default=24h"`
+	SessionAbsoluteTTL      time.Duration               `json:",default=168h"`
+	SessionTouchInterval    time.Duration               `json:",default=5m"`
+	CookieSecure            bool                        `json:",default=true"`
+	AllowedOrigins          []string                    `json:"AllowedOrigins,optional"`
+	LoginRateLimit          LoginRateLimitConf          `json:"LoginRateLimit"`
+	PasswordChangeRateLimit PasswordChangeRateLimitConf `json:"PasswordChangeRateLimit"`
+	TrustProxyHeaders       bool                        `json:",default=false"`
+	TrustedProxyCIDRs       []string                    `json:",optional"`
 }
 
 // LoginRateLimitConf 登录限流：固定窗口内每来源 IP 的最大尝试次数。
 type LoginRateLimitConf struct {
 	Window      time.Duration `json:",default=60s"`
 	MaxAttempts int           `json:",default=10"`
+}
+
+// PasswordChangeRateLimitConf 修改密码旧密码错误限流：按用户 ID 的固定窗口，
+// 与登录限流完全独立（design.md §4.2 / AC23 / AC24 / AC42）。
+type PasswordChangeRateLimitConf struct {
+	Window      time.Duration `json:",default=15m"`
+	MaxAttempts int           `json:",default=5"`
 }
 
 // DatabaseConf 连接池配置；DataSource 生产环境经环境变量注入。
@@ -71,6 +79,13 @@ func (c Config) Validate() error {
 	}
 	if c.Auth.LoginRateLimit.Window <= 0 || c.Auth.LoginRateLimit.MaxAttempts <= 0 {
 		return errors.New("Auth.LoginRateLimit window and maxAttempts must be positive")
+	}
+	if c.Auth.PasswordChangeRateLimit.Window <= 0 || c.Auth.PasswordChangeRateLimit.MaxAttempts <= 0 {
+		return errors.New("Auth.PasswordChangeRateLimit window and maxAttempts must be positive")
+	}
+	// 修改密码限流与 sqlcache 共用 Redis；缺失时无法保证 AC23/AC24/AC42。
+	if len(c.Cache) == 0 {
+		return errors.New("Cache (Redis) is required for password change rate limiting")
 	}
 	return nil
 }

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/relayx-tech/panel/internal/testsupport"
+	"github.com/relayx-tech/panel/migrations"
 )
 
 func goodFS() fstest.MapFS {
@@ -219,5 +220,42 @@ func TestDownWithoutMigrations(t *testing.T) {
 	db := testsupport.NewPostgres(t)
 	if err := Down(context.Background(), db, goodFS()); err == nil {
 		t.Fatal("down without applied migrations should fail")
+	}
+}
+
+// TC-BE-045/046：真实迁移创建 auth_password_audits 与索引，Down 可回滚。
+func TestPasswordAuditMigrationUpDown(t *testing.T) {
+	db := testsupport.NewPostgres(t)
+	ctx := context.Background()
+
+	if err := Up(ctx, db, migrations.FS); err != nil {
+		t.Fatalf("up: %v", err)
+	}
+	var exists bool
+	if err := db.QueryRow(`SELECT to_regclass('public.auth_password_audits') IS NOT NULL`).Scan(&exists); err != nil {
+		t.Fatalf("check audit table: %v", err)
+	}
+	if !exists {
+		t.Fatal("auth_password_audits not created")
+	}
+
+	statuses, err := Status(ctx, db, migrations.FS)
+	if err != nil {
+		t.Fatalf("status: %v", err)
+	}
+	for _, s := range statuses {
+		if s.State != "applied" {
+			t.Fatalf("migration %v state = %v", s.Source, s.State)
+		}
+	}
+
+	if err := Down(ctx, db, migrations.FS); err != nil {
+		t.Fatalf("down: %v", err)
+	}
+	if err := db.QueryRow(`SELECT to_regclass('public.auth_password_audits') IS NOT NULL`).Scan(&exists); err != nil {
+		t.Fatalf("check audit table after down: %v", err)
+	}
+	if exists {
+		t.Fatal("auth_password_audits still exists after down")
 	}
 }

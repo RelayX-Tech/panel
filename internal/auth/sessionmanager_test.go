@@ -62,6 +62,16 @@ func (f *fakeSessionModel) RevokeByHash(_ context.Context, _ sqlx.Session, hash 
 	return nil
 }
 
+func (f *fakeSessionModel) RevokeAllByUserID(_ context.Context, _ sqlx.Session, userID string) (int64, error) {
+	var n int64
+	for _, row := range f.rows {
+		if row.Session.UserID == userID && row.Session.RevokedAt == nil {
+			n++
+		}
+	}
+	return n, nil
+}
+
 func (f *fakeSessionModel) DeleteExpiredBefore(context.Context, sqlx.Session, time.Time) (int64, error) {
 	return 0, nil
 }

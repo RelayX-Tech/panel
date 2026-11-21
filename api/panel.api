@@ -56,6 +56,19 @@ type SessionResp {
 	requestId string      `json:"requestId"`
 }
 
+// ---- API-04 修改密码 ----
+type ChangePasswordReq {
+	oldPassword string `json:"oldPassword"`
+	newPassword string `json:"newPassword"`
+}
+
+type ChangePasswordResp {
+	code      string      `json:"code"`
+	message   string      `json:"message"`
+	data      interface{} `json:"data"`
+	requestId string      `json:"requestId"`
+}
+
 @server (
 	prefix:     /api/v1/auth
 	group:      auth
@@ -80,5 +93,16 @@ service panel-api {
 	@doc "读取当前会话"
 	@handler Session
 	get /session returns (SessionResp)
+}
+
+@server (
+	prefix:     /api/v1/auth
+	group:      auth
+	middleware: OriginCheck,Auth
+)
+service panel-api {
+	@doc "修改当前用户密码（成功后吊销全部会话）"
+	@handler ChangePassword
+	post /password (ChangePasswordReq) returns (ChangePasswordResp)
 }
 

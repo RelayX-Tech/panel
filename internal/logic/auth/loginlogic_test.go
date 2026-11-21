@@ -22,6 +22,13 @@ type fakeUsers struct {
 	user  *model.User
 	err   error
 	users []*model.User
+
+	updatedHash   string
+	updateErr     error
+	lockErr       error
+	invalidated   bool
+	invalidateErr error
+	locked        bool
 }
 
 func (f *fakeUsers) Create(_ context.Context, _ sqlx.Session, account, hash, display string) (*model.User, error) {
@@ -50,6 +57,30 @@ func (f *fakeUsers) FindByAccount(context.Context, string) (*model.User, error) 
 	return &cp, nil
 }
 
+func (f *fakeUsers) LockByID(context.Context, sqlx.Session, string) (*model.User, error) {
+	f.locked = true
+	if f.lockErr != nil {
+		return nil, f.lockErr
+	}
+	return f.FindOne(context.Background(), "")
+}
+
+func (f *fakeUsers) UpdatePasswordHash(_ context.Context, _ sqlx.Session, id, hash string) error {
+	if f.updateErr != nil {
+		return f.updateErr
+	}
+	f.updatedHash = hash
+	if f.user != nil {
+		f.user.PasswordHash = hash
+	}
+	return nil
+}
+
+func (f *fakeUsers) InvalidateCache(context.Context, string) error {
+	f.invalidated = true
+	return f.invalidateErr
+}
+
 func (f *fakeUsers) Count(context.Context, sqlx.Session) (int64, error) { return 0, nil }
 
 type fakeSessions struct {
@@ -57,6 +88,10 @@ type fakeSessions struct {
 	rows    map[string]*model.SessionWithUser
 	touched int
 	revoked int
+
+	revokedAll      int
+	revokedAllCount int64
+	revokeAllErr    error
 }
 
 func newFakeSessions() *fakeSessions {
@@ -86,6 +121,14 @@ func (f *fakeSessions) Touch(context.Context, sqlx.Session, string, time.Time, t
 func (f *fakeSessions) RevokeByHash(context.Context, sqlx.Session, []byte) error {
 	f.revoked++
 	return nil
+}
+
+func (f *fakeSessions) RevokeAllByUserID(context.Context, sqlx.Session, string) (int64, error) {
+	f.revokedAll++
+	if f.revokeAllErr != nil {
+		return 0, f.revokeAllErr
+	}
+	return f.revokedAllCount, nil
 }
 
 func (f *fakeSessions) DeleteExpiredBefore(context.Context, sqlx.Session, time.Time) (int64, error) {

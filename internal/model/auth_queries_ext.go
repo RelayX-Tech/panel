@@ -98,6 +98,17 @@ func (m *PostgresAuthSessionModel) RevokeByHash(ctx context.Context, session sql
 	return nil
 }
 
+// RevokeAllByUserID 吊销该用户全部未吊销会话（含当前设备）；返回影响行数。
+// 修改密码成功后调用，其他设备下一次请求由 Auth 中间件返回 AUTH_SESSION_EXPIRED。
+func (m *PostgresAuthSessionModel) RevokeAllByUserID(ctx context.Context, session sqlx.Session, userID string) (int64, error) {
+	const query = `UPDATE auth_sessions SET revoked_at = now() WHERE user_id = $1::uuid AND revoked_at IS NULL`
+	n, err := execAffected(ctx, m.conn, session, query, userID)
+	if err != nil {
+		return 0, fmt.Errorf("revoke sessions by user: %w", err)
+	}
+	return n, nil
+}
+
 // DeleteExpiredBefore 删除过期超过保留期的会话；可在事务内调用。
 func (m *PostgresAuthSessionModel) DeleteExpiredBefore(ctx context.Context, session sqlx.Session, before time.Time) (int64, error) {
 	const query = `DELETE FROM auth_sessions WHERE expires_at < $1`

@@ -4,6 +4,9 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+
+	"github.com/zeromicro/go-zero/core/stores/cache"
+	"github.com/zeromicro/go-zero/core/stores/redis"
 )
 
 func TestLoadPanelConfig(t *testing.T) {
@@ -36,21 +39,32 @@ func TestLoadPanelConfig(t *testing.T) {
 	if c.Auth.LoginRateLimit.MaxAttempts != 10 {
 		t.Errorf("LoginRateLimit.MaxAttempts = %d, want 10", c.Auth.LoginRateLimit.MaxAttempts)
 	}
+	if c.Auth.PasswordChangeRateLimit.Window != 15*time.Minute {
+		t.Errorf("PasswordChangeRateLimit.Window = %v, want 15m", c.Auth.PasswordChangeRateLimit.Window)
+	}
+	if c.Auth.PasswordChangeRateLimit.MaxAttempts != 5 {
+		t.Errorf("PasswordChangeRateLimit.MaxAttempts = %d, want 5", c.Auth.PasswordChangeRateLimit.MaxAttempts)
+	}
 	if len(c.Auth.AllowedOrigins) == 0 {
 		t.Error("AllowedOrigins is empty")
+	}
+	if len(c.Cache) == 0 {
+		t.Error("Cache is empty; password change limiter requires Redis")
 	}
 }
 
 func TestConfigValidation(t *testing.T) {
 	c := Config{
 		Auth: AuthConf{
-			SessionCookieName:    "relayx_session",
-			SessionIdleTTL:       24 * time.Hour,
-			SessionAbsoluteTTL:   168 * time.Hour,
-			SessionTouchInterval: 5 * time.Minute,
-			LoginRateLimit:       LoginRateLimitConf{Window: time.Minute, MaxAttempts: 10},
-			AllowedOrigins:       []string{"https://panel.example.com"},
+			SessionCookieName:       "relayx_session",
+			SessionIdleTTL:          24 * time.Hour,
+			SessionAbsoluteTTL:      168 * time.Hour,
+			SessionTouchInterval:    5 * time.Minute,
+			LoginRateLimit:          LoginRateLimitConf{Window: time.Minute, MaxAttempts: 10},
+			PasswordChangeRateLimit: PasswordChangeRateLimitConf{Window: 15 * time.Minute, MaxAttempts: 5},
+			AllowedOrigins:          []string{"https://panel.example.com"},
 		},
+		Cache: cache.CacheConf{{RedisConf: redis.RedisConf{Host: "127.0.0.1:56379", Type: "node"}, Weight: 100}},
 	}
 	if err := c.Validate(); err != nil {
 		t.Fatalf("valid config rejected: %v", err)
@@ -72,5 +86,23 @@ func TestConfigValidation(t *testing.T) {
 	bad.Auth.LoginRateLimit.MaxAttempts = 0
 	if err := bad.Validate(); err == nil {
 		t.Error("zero MaxAttempts should be rejected")
+	}
+
+	bad = c
+	bad.Auth.PasswordChangeRateLimit.Window = 0
+	if err := bad.Validate(); err == nil {
+		t.Error("zero PasswordChangeRateLimit.Window should be rejected")
+	}
+
+	bad = c
+	bad.Auth.PasswordChangeRateLimit.MaxAttempts = 0
+	if err := bad.Validate(); err == nil {
+		t.Error("zero PasswordChangeRateLimit.MaxAttempts should be rejected")
+	}
+
+	bad = c
+	bad.Cache = nil
+	if err := bad.Validate(); err == nil {
+		t.Error("empty Cache should be rejected (password change limiter requires Redis)")
 	}
 }

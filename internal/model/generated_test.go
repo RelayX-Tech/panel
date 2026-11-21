@@ -15,6 +15,8 @@ var generatedModelFiles = []string{
 	"authusersmodel_gen.go",
 	"authsessionsmodel.go",
 	"authsessionsmodel_gen.go",
+	"authpasswordauditsmodel.go",
+	"authpasswordauditsmodel_gen.go",
 	"vars.go",
 }
 
@@ -43,6 +45,7 @@ func TestGeneratedModelsCommitted(t *testing.T) {
 var (
 	_ func(sqlx.SqlConn, cache.CacheConf, ...cache.Option) AuthUsersModel    = NewAuthUsersModel
 	_ func(sqlx.SqlConn, cache.CacheConf, ...cache.Option) AuthSessionsModel = NewAuthSessionsModel
+	_ func(sqlx.SqlConn) AuthPasswordAuditsModel                             = NewAuthPasswordAuditsModel
 )
 
 // TestGeneratedModelFields 确保生成类型覆盖领域字段（uuid / bytea / timestamptz）。
@@ -54,5 +57,9 @@ func TestGeneratedModelFields(t *testing.T) {
 	s := AuthSessions{Id: "id", SessionHash: "hash", UserId: "uid"}
 	if s.Id == "" || s.SessionHash != "hash" || s.UserId != "uid" {
 		t.Errorf("AuthSessions = %+v", s)
+	}
+	a := AuthPasswordAudits{Id: "id", UserId: "uid", RequestId: "rid", Result: "success"}
+	if a.Id == "" || a.UserId != "uid" || a.RequestId != "rid" || a.Result != "success" {
+		t.Errorf("AuthPasswordAudits = %+v", a)
 	}
 }

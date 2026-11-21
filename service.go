@@ -30,6 +30,7 @@ import (
 
 const (
 	sessionRetention = 7 * 24 * time.Hour
+	auditRetention   = 180 * 24 * time.Hour
 	cleanupInterval  = time.Hour
 	startupTimeout   = 30 * time.Second
 )
@@ -102,6 +103,7 @@ func main() {
 	handler.RegisterHandlers(server, svcCtx)
 
 	startSessionCleanup(svcCtx)
+	startAuditCleanup(svcCtx)
 
 	fmt.Printf("starting %s on %s:%d\n", c.Name, c.Host, c.Port)
 	server.Start()
@@ -215,6 +217,41 @@ func startSessionCleanup(svcCtx *svc.ServiceContext) {
 					logx.Infow("session cleanup", logx.Field("deleted", n))
 				}
 			case <-stop:
+				return
+			}
+		}
+	}()
+	proc.AddShutdownListener(shutdown)
+}
+
+// startAuditCleanup 每日 03:00 UTC 删除超过 180 天的修改密码审计（design.md §4.3）；
+// 删除前记录 cutoff，便于审计追溯。进程优雅停机时停止。
+func startAuditCleanup(svcCtx *svc.ServiceContext) {
+	stop := make(chan struct{})
+	var once sync.Once
+	shutdown := func() { once.Do(func() { close(stop) }) }
+	go func() {
+		for {
+			now := time.Now().UTC()
+			next := time.Date(now.Year(), now.Month(), now.Day(), 3, 0, 0, 0, time.UTC)
+			if !next.After(now) {
+				next = next.Add(24 * time.Hour)
+			}
+			timer := time.NewTimer(time.Until(next))
+			select {
+			case <-timer.C:
+				cutoff := time.Now().UTC().Add(-auditRetention)
+				logx.Infow("auth.password.audit_cleanup", logx.Field("cutoff", cutoff.Format(time.RFC3339)))
+				n, err := svcCtx.AuditModel.DeleteBefore(context.Background(), nil, cutoff)
+				if err != nil {
+					logx.Errorw("auth.password.audit_cleanup", logx.Field("result", "failure"),
+						logx.Field("error", err.Error()))
+					continue
+				}
+				logx.Infow("auth.password.audit_cleanup", logx.Field("result", "success"),
+					logx.Field("deleted", n))
+			case <-stop:
+				timer.Stop()
 				return
 			}
 		}

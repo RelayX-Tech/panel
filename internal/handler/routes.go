@@ -48,4 +48,19 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		),
 		rest.WithPrefix("/api/v1/auth"),
 	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.OriginCheck, serverCtx.Auth},
+			[]rest.Route{
+				{
+					// 修改当前用户密码（成功后吊销全部会话）
+					Method:  http.MethodPost,
+					Path:    "/password",
+					Handler: auth.ChangePasswordHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/api/v1/auth"),
+	)
 }

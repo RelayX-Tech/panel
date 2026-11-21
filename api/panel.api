@@ -1,0 +1,84 @@
+syntax = "v1"
+
+info (
+	title:   "Panel API"
+	desc:    "RelayX Panel 管理面 API（design.md §3）"
+	version: "v1"
+)
+
+// ---- API-01 登录 ----
+type LoginReq {
+	account  string `json:"account"`
+	password string `json:"password"`
+}
+
+type UserInfo {
+	id          string `json:"id"`
+	account     string `json:"account"`
+	displayName string `json:"displayName"`
+}
+
+type SessionInfo {
+	expiresAt         string `json:"expiresAt"`
+	absoluteExpiresAt string `json:"absoluteExpiresAt"`
+}
+
+type LoginData {
+	user    UserInfo    `json:"user"`
+	session SessionInfo `json:"session"`
+}
+
+type LoginResp {
+	code      string    `json:"code"`
+	message   string    `json:"message"`
+	data      LoginData `json:"data"`
+	requestId string    `json:"requestId"`
+}
+
+// ---- API-02 注销 ----
+type LogoutResp {
+	code      string      `json:"code"`
+	message   string      `json:"message"`
+	data      interface{} `json:"data"`
+	requestId string      `json:"requestId"`
+}
+
+// ---- API-03 当前会话 ----
+type SessionData {
+	user    UserInfo    `json:"user"`
+	session SessionInfo `json:"session"`
+}
+
+type SessionResp {
+	code      string      `json:"code"`
+	message   string      `json:"message"`
+	data      SessionData `json:"data"`
+	requestId string      `json:"requestId"`
+}
+
+@server (
+	prefix:     /api/v1/auth
+	group:      auth
+	middleware: OriginCheck,LoginRateLimit
+)
+service panel-api {
+	@doc "账号密码登录"
+	@handler Login
+	post /login (LoginReq) returns (LoginResp)
+
+	@doc "注销当前会话（幂等）"
+	@handler Logout
+	post /logout returns (LogoutResp)
+}
+
+@server (
+	prefix:     /api/v1/auth
+	group:      auth
+	middleware: Auth
+)
+service panel-api {
+	@doc "读取当前会话"
+	@handler Session
+	get /session returns (SessionResp)
+}
+

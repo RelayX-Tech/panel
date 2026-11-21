@@ -43,6 +43,8 @@ type AppError struct {
 	Message string
 	Field   string
 	Details []FieldError
+	// RetryAfterSeconds 非零时由 handler 写入 Retry-After 响应头（429 限流）。
+	RetryAfterSeconds int
 	// Err 仅用于服务端日志，不返回给客户端。
 	Err error
 }
@@ -150,7 +152,48 @@ func InvalidRequest(err error) *AppError {
 }
 
 func RateLimited(retryAfterSeconds int) *AppError {
-	return &AppError{Status: errcode.HTTPStatus[errcode.RATE_LIMITED], Code: errcode.RATE_LIMITED, Message: "too many attempts"}
+	return &AppError{
+		Status:            errcode.HTTPStatus[errcode.RATE_LIMITED],
+		Code:              errcode.RATE_LIMITED,
+		Message:           "too many attempts",
+		RetryAfterSeconds: retryAfterSeconds,
+	}
+}
+
+// InvalidOldPassword 表示修改密码时旧密码校验失败（400，字段级，不触发全局 401）。
+func InvalidOldPassword() *AppError {
+	const message = "old password is incorrect"
+	return &AppError{
+		Status:  errcode.HTTPStatus[errcode.VALIDATION_INVALID_OLD_PASSWORD],
+		Code:    errcode.VALIDATION_INVALID_OLD_PASSWORD,
+		Message: message,
+		Field:   "oldPassword",
+		Details: []FieldError{{Field: "oldPassword", Code: "INVALID_OLD_PASSWORD", Message: message}},
+	}
+}
+
+// InvalidNewPassword 表示新密码不满足长度 / 非空白要求；detailCode 为
+// TOO_SHORT / TOO_LONG / NO_PRINTABLE，供前端选择精确文案。
+func InvalidNewPassword(detailCode, message string) *AppError {
+	return &AppError{
+		Status:  errcode.HTTPStatus[errcode.VALIDATION_INVALID_NEW_PASSWORD],
+		Code:    errcode.VALIDATION_INVALID_NEW_PASSWORD,
+		Message: "new password does not meet requirements",
+		Field:   "newPassword",
+		Details: []FieldError{{Field: "newPassword", Code: detailCode, Message: message}},
+	}
+}
+
+// NewPasswordSameAsOld 表示新旧密码完全相同（400，字段级）。
+func NewPasswordSameAsOld() *AppError {
+	const message = "new password must differ from the old password"
+	return &AppError{
+		Status:  errcode.HTTPStatus[errcode.VALIDATION_NEW_PASSWORD_SAME_AS_OLD],
+		Code:    errcode.VALIDATION_NEW_PASSWORD_SAME_AS_OLD,
+		Message: message,
+		Field:   "newPassword",
+		Details: []FieldError{{Field: "newPassword", Code: "SAME_AS_OLD", Message: message}},
+	}
 }
 
 func Internal(err error) *AppError {

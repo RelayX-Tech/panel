@@ -65,7 +65,12 @@ func TestSwaggerArtifactMatchesContract(t *testing.T) {
 	}
 
 	paths, _ := committed["paths"].(map[string]any)
-	for _, p := range []string{"/api/v1/auth/login", "/api/v1/auth/logout", "/api/v1/auth/session"} {
+	for _, p := range []string{
+		"/api/v1/auth/login",
+		"/api/v1/auth/logout",
+		"/api/v1/auth/session",
+		"/api/v1/auth/password",
+	} {
 		if _, ok := paths[p]; !ok {
 			t.Errorf("swagger missing path %s", p)
 		}
@@ -81,6 +86,7 @@ func TestSwaggerEnvelopeFieldsPresent(t *testing.T) {
 		{"/api/v1/auth/login", "post"},
 		{"/api/v1/auth/logout", "post"},
 		{"/api/v1/auth/session", "get"},
+		{"/api/v1/auth/password", "post"},
 	} {
 		op := paths[tc.path].(map[string]any)[tc.method].(map[string]any)
 		schema := op["responses"].(map[string]any)["200"].(map[string]any)["schema"].(map[string]any)

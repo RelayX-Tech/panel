@@ -30,13 +30,14 @@ const testOrigin = "http://panel.test"
 func testConfig() config.Config {
 	c := config.Config{}
 	c.Auth = config.AuthConf{
-		SessionCookieName:    "relayx_session",
-		SessionIdleTTL:       24 * time.Hour,
-		SessionAbsoluteTTL:   168 * time.Hour,
-		SessionTouchInterval: 5 * time.Minute,
-		CookieSecure:         false,
-		AllowedOrigins:       []string{testOrigin},
-		LoginRateLimit:       config.LoginRateLimitConf{Window: time.Minute, MaxAttempts: 10},
+		SessionCookieName:       "relayx_session",
+		SessionIdleTTL:          24 * time.Hour,
+		SessionAbsoluteTTL:      168 * time.Hour,
+		SessionTouchInterval:    5 * time.Minute,
+		CookieSecure:            false,
+		AllowedOrigins:          []string{testOrigin},
+		LoginRateLimit:          config.LoginRateLimitConf{Window: time.Minute, MaxAttempts: 10},
+		PasswordChangeRateLimit: config.PasswordChangeRateLimitConf{Window: 15 * time.Minute, MaxAttempts: 5},
 	}
 	return c
 }
@@ -60,6 +61,7 @@ func newTestEnv(t *testing.T) *testEnv {
 	loginChain := chain(handlerLogin(svcCtx), svcCtx.OriginCheck, svcCtx.LoginRateLimit)
 	logoutChain := chain(handlerLogout(svcCtx), svcCtx.OriginCheck)
 	sessionChain := chain(handlerSession(svcCtx), svcCtx.Auth)
+	changePasswordChain := chain(handlerChangePassword(svcCtx), svcCtx.OriginCheck, svcCtx.Auth)
 
 	root := middleware.Recovery()(requestid.Middleware()(middleware.AccessLog()(middleware.SecurityHeaders()(
 		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -70,6 +72,8 @@ func newTestEnv(t *testing.T) *testEnv {
 				logoutChain(w, r)
 			case r.Method == http.MethodGet && r.URL.Path == "/api/v1/auth/session":
 				sessionChain(w, r)
+			case r.Method == http.MethodPost && r.URL.Path == "/api/v1/auth/password":
+				changePasswordChain(w, r)
 			default:
 				http.NotFound(w, r)
 			}
@@ -90,6 +94,9 @@ func chain(h http.HandlerFunc, mws ...func(http.HandlerFunc) http.HandlerFunc) h
 func handlerLogin(s *svc.ServiceContext) http.HandlerFunc   { return handlers.LoginHandler(s) }
 func handlerLogout(s *svc.ServiceContext) http.HandlerFunc  { return handlers.LogoutHandler(s) }
 func handlerSession(s *svc.ServiceContext) http.HandlerFunc { return handlers.SessionHandler(s) }
+func handlerChangePassword(s *svc.ServiceContext) http.HandlerFunc {
+	return handlers.ChangePasswordHandler(s)
+}
 
 func (e *testEnv) createAdmin(t *testing.T, account, password string, disabled bool) *model.User {
 	t.Helper()

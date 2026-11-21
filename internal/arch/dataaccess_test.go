@@ -10,11 +10,13 @@ import (
 
 // 生成物白名单：goctl 生成文件允许出现 database/sql（实为 sql.Result / sql.Null* 映射）。
 var generatedModelFiles = map[string]bool{
-	"authusersmodel.go":        true,
-	"authusersmodel_gen.go":    true,
-	"authsessionsmodel.go":     true,
-	"authsessionsmodel_gen.go": true,
-	"vars.go":                  true,
+	"authusersmodel.go":              true,
+	"authusersmodel_gen.go":          true,
+	"authsessionsmodel.go":           true,
+	"authsessionsmodel_gen.go":       true,
+	"authpasswordauditsmodel.go":     true,
+	"authpasswordauditsmodel_gen.go": true,
+	"vars.go":                        true,
 }
 
 var forbiddenPersistencePatterns = []string{

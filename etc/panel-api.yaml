@@ -14,6 +14,10 @@ Auth:
   LoginRateLimit:
     Window: 60s
     MaxAttempts: 10
+  # 修改密码旧密码错误限流（按用户 ID，独立于登录限流；design.md §4.2）。
+  PasswordChangeRateLimit:
+    Window: 15m
+    MaxAttempts: 5
   TrustProxyHeaders: false    # 启用时按 TrustedProxyCIDRs 解析 X-Forwarded-For
   TrustedProxyCIDRs: []
 

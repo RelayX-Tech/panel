@@ -45,6 +45,7 @@ jobs:
 
     env:
       RELAYX_TEST_DSN: postgres://relayx:relayx@127.0.0.1:5432/relayx_test?sslmode=disable
+      RELAYX_DB_DSN: postgres://relayx:relayx@127.0.0.1:5432/relayx_test?sslmode=disable
       REDIS_ADDR: 127.0.0.1:6379
 
     steps:
@@ -71,6 +72,14 @@ jobs:
 
       - name: build
         run: go build ./...
+
+      # OPS-1：迁移门禁——CLI 入口可 up / status，且迁移文件（含 auth_password_audits）可干净应用。
+      # 契约生成物一致性由 tests/integration 的 TestAPIContractValidates /
+      # TestSwaggerArtifactMatchesContract 覆盖，无需重复步骤。
+      - name: migrate up + status
+        run: |
+          go run . migrate up
+          go run . migrate status
 
       - name: unit tests
         run: go test ./internal/... ./cmd/... -count=1

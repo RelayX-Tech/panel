@@ -96,6 +96,35 @@ func (m *PostgresAuthUserModel) FindOne(ctx context.Context, id string) (*User, 
 	return toDomainUser(row), nil
 }
 
+// LockByID 在事务内对用户行加锁读取（SELECT ... FOR UPDATE），用于串行化并发修改密码。
+// 不走 sqlcache：行锁语义要求读已提交的最新数据。
+func (m *PostgresAuthUserModel) LockByID(ctx context.Context, session sqlx.Session, id string) (*User, error) {
+	const query = `SELECT id, account, password_hash, display_name, disabled_at, created_at, updated_at
+FROM auth_users WHERE id = $1::uuid FOR UPDATE`
+	row := &AuthUsers{}
+	if err := queryRowCtx(ctx, m.conn, session, row, query, id); err != nil {
+		if errors.Is(err, ErrNotFound) {
+			return nil, ErrNotFound
+		}
+		return nil, fmt.Errorf("lock auth user: %w", err)
+	}
+	return toDomainUser(row), nil
+}
+
+// UpdatePasswordHash 更新密码哈希与 updated_at；可在事务内调用。
+func (m *PostgresAuthUserModel) UpdatePasswordHash(ctx context.Context, session sqlx.Session, id, passwordHash string) error {
+	const query = `UPDATE auth_users SET password_hash = $2, updated_at = now() WHERE id = $1::uuid`
+	if _, err := execAffected(ctx, m.conn, session, query, id, passwordHash); err != nil {
+		return fmt.Errorf("update password hash: %w", err)
+	}
+	return nil
+}
+
+// InvalidateCache 删除主键点查缓存；事务提交后调用（失败仅告警，不影响已提交结果）。
+func (m *PostgresAuthUserModel) InvalidateCache(ctx context.Context, id string) error {
+	return m.generated.DelCacheCtx(ctx, cachePublicAuthUsersIdPrefix+id)
+}
+
 // newID 在应用内生成 UUID v4（design.md §5.1.5：不依赖 RETURNING）。
 func newID() string {
 	return uuid.NewString()

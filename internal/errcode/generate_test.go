@@ -1,6 +1,7 @@
 package errcode
 
 import (
+	"regexp"
 	"strings"
 	"testing"
 )
@@ -17,7 +18,8 @@ func TestGenerateGoContainsConstantsAndMaps(t *testing.T) {
 	if err != nil {
 		t.Fatalf("generate go: %v", err)
 	}
-	text := string(out)
+	// go/format 会按最长标识符对齐；归一化空白后只断言 token 序列。
+	text := regexp.MustCompile(`\s+`).ReplaceAllString(string(out), " ")
 	for _, want := range []string{
 		`OK = "OK"`,
 		`AUTH_UNAUTHORIZED = "AUTH_UNAUTHORIZED"`,

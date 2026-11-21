@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"go/format"
 	"sort"
 )
 
@@ -35,7 +36,13 @@ func GenerateGo(codes []Code) ([]byte, error) {
 		fmt.Fprintf(&buf, "\t%q: %q,\n", c.Code, c.I18n)
 	}
 	buf.WriteString("}\n")
-	return buf.Bytes(), nil
+
+	// 交给 go/format 对齐常量/map 字面量，保证生成物与 gofmt 门禁一致。
+	formatted, err := format.Source(buf.Bytes())
+	if err != nil {
+		return nil, fmt.Errorf("format generated go: %w", err)
+	}
+	return formatted, nil
 }
 
 // GenerateTS 生成 packages/api-client/src/generated/error-codes.ts。

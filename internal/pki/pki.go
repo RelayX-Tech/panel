@@ -103,13 +103,14 @@ func (ca *CA) SignCSR(csrPEM []byte, nodeID string, validity time.Duration) (*Is
 	}
 	now := time.Now().UTC()
 	tmpl := &x509.Certificate{
-		SerialNumber:          serial,
-		Subject:               pkix.Name{CommonName: nodeID},
-		DNSNames:              []string{nodeID},
-		NotBefore:             now.Add(-time.Minute),
-		NotAfter:              now.Add(validity),
-		KeyUsage:              x509.KeyUsageDigitalSignature,
-		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth},
+		SerialNumber: serial,
+		Subject:      pkix.Name{CommonName: nodeID},
+		DNSNames:     []string{nodeID},
+		NotBefore:    now.Add(-time.Minute),
+		NotAfter:     now.Add(validity),
+		KeyUsage:     x509.KeyUsageDigitalSignature,
+		// Agent 既是 Panel 调用的服务端（serverAuth），也用于注册客户端（clientAuth）。
+		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth, x509.ExtKeyUsageClientAuth},
 		BasicConstraintsValid: true,
 	}
 	der, err := x509.CreateCertificate(rand.Reader, tmpl, ca.cert, csr.PublicKey, ca.key)

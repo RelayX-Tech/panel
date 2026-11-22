@@ -76,14 +76,17 @@ func TestSignCSR(t *testing.T) {
 	if len(leaf.DNSNames) != 1 || leaf.DNSNames[0] != "node-1" {
 		t.Fatalf("SAN = %v", leaf.DNSNames)
 	}
-	hasClientAuth := false
+	hasClientAuth, hasServerAuth := false, false
 	for _, eku := range leaf.ExtKeyUsage {
 		if eku == x509.ExtKeyUsageClientAuth {
 			hasClientAuth = true
 		}
+		if eku == x509.ExtKeyUsageServerAuth {
+			hasServerAuth = true
+		}
 	}
-	if !hasClientAuth {
-		t.Fatal("缺少 clientAuth EKU")
+	if !hasClientAuth || !hasServerAuth {
+		t.Fatalf("EKU 缺失: clientAuth=%v serverAuth=%v", hasClientAuth, hasServerAuth)
 	}
 	if validFor := time.Until(leaf.NotAfter); validFor < 89*24*time.Hour || validFor > 91*24*time.Hour {
 		t.Fatalf("有效期异常: %v", validFor)
@@ -96,6 +99,19 @@ func TestSignCSR(t *testing.T) {
 	pool.AddCert(cert)
 	if _, err := leaf.Verify(x509.VerifyOptions{Roots: pool, KeyUsages: []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth}}); err != nil {
 		t.Fatalf("证书链校验失败: %v", err)
+	}
+}
+
+// REG-11：CA 私钥与证书不匹配时签发失败（ErrCertIssue）。
+func TestSignCSRCAKeyMismatch(t *testing.T) {
+	cert, _, caPEM := newCA(t)
+	otherKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ca := pki.NewCA(cert, otherKey, caPEM)
+	if _, err := ca.SignCSR(newCSR(t), "node-1", time.Hour); !errors.Is(err, pki.ErrCertIssue) {
+		t.Fatalf("CA 私钥不匹配应 ErrCertIssue, got %v", err)
 	}
 }
 

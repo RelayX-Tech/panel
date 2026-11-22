@@ -10,6 +10,7 @@ import (
 	"encoding/pem"
 	"errors"
 	"math/big"
+	"strings"
 	"testing"
 	"time"
 
@@ -113,6 +114,44 @@ func TestRegisterTokenErrors(t *testing.T) {
 	fresh, _ := svc.CreateToken(ctx, "entry")
 	if _, err := svc.Register(ctx, fresh, "node-2", "entry", []byte("bad-csr")); !errors.Is(err, register.ErrCSRInvalid) {
 		t.Fatalf("非法 CSR err = %v", err)
+	}
+}
+
+// REG-13：错误信息不泄露 Token / CSR 明文。
+func TestRegisterDoesNotLeakSecrets(t *testing.T) {
+	svc := newService(t)
+	ctx := context.Background()
+
+	const token = "super-secret-token-value"
+	if _, err := svc.Register(ctx, token, "node-1", "entry", newCSR(t)); err == nil || strings.Contains(err.Error(), token) {
+		t.Fatalf("错误信息不应泄露 token: %v", err)
+	}
+
+	fresh, _ := svc.CreateToken(ctx, "entry")
+	if _, err := svc.Register(ctx, fresh, "node-2", "entry", []byte("SECRET_CSR_BYTES")); err == nil || strings.Contains(err.Error(), "SECRET_CSR_BYTES") {
+		t.Fatalf("错误信息不应泄露 CSR: %v", err)
+	}
+}
+
+// REG-16：已注册节点的指纹变更需先吊销，不能直接覆盖。
+func TestRegisterFingerprintChangeRequiresRevoke(t *testing.T) {
+	svc := newService(t)
+	ctx := context.Background()
+
+	token, _ := svc.CreateToken(ctx, "entry")
+	if _, err := svc.Register(ctx, token, "node-1", "entry", newCSR(t)); err != nil {
+		t.Fatal(err)
+	}
+	token2, _ := svc.CreateToken(ctx, "entry")
+	if _, err := svc.Register(ctx, token2, "node-1", "entry", newCSR(t)); !errors.Is(err, register.ErrAlreadyRegistered) {
+		t.Fatalf("指纹变更需先吊销, got %v", err)
+	}
+	if err := svc.Revoke(ctx, "node-1"); err != nil {
+		t.Fatal(err)
+	}
+	token3, _ := svc.CreateToken(ctx, "entry")
+	if _, err := svc.Register(ctx, token3, "node-1", "entry", newCSR(t)); err != nil {
+		t.Fatalf("吊销后应可重注册: %v", err)
 	}
 }
 

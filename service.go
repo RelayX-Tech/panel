@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net"
 	"os"
 	"sync"
 	"time"
@@ -25,6 +26,7 @@ import (
 	"github.com/relayx-tech/panel/internal/model"
 	"github.com/relayx-tech/panel/internal/requestid"
 	"github.com/relayx-tech/panel/internal/response"
+	"github.com/relayx-tech/panel/internal/server/registration"
 	"github.com/relayx-tech/panel/internal/svc"
 	"github.com/relayx-tech/panel/migrations"
 )
@@ -92,6 +94,25 @@ func main() {
 	server.Use(middleware.SecurityHeaders())
 
 	svcCtx := svc.NewServiceContext(c, conn, c.Cache)
+
+	// 节点注册 gRPC 服务（design §3.10）；启用且已配置 Panel CA 时启动。
+	if c.Registration.Enabled && svcCtx.Register != nil {
+		regSrv, err := registration.NewGRPCServer(c.Registration, svcCtx.Register)
+		if err != nil {
+			log.Fatalf("registration server init: %v", err)
+		}
+		lis, err := net.Listen("tcp", c.Registration.ListenOn)
+		if err != nil {
+			log.Fatalf("registration listen: %v", err)
+		}
+		go func() {
+			if serr := regSrv.Serve(lis); serr != nil {
+				logx.Errorw("registration gRPC stopped", logx.Field("error", serr.Error()))
+			}
+		}()
+		proc.AddShutdownListener(func() { regSrv.GracefulStop() })
+		logx.Infow("registration gRPC listening", logx.Field("addr", c.Registration.ListenOn))
+	}
 
 	// readyz：DB / 迁移 /（已配置时）core-control 与 Agent 可达性。
 	readyzChecks := []func() error{

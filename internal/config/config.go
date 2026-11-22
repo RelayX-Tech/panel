@@ -21,6 +21,21 @@ type Config struct {
 	// STO-002 下发编排：core-control / Agent gRPC 客户端。
 	CoreControl CoreControlConf `json:"CoreControl,optional"`
 	Agent       AgentConf       `json:"Agent,optional"`
+
+	// STO-002 节点注册：RegistrationService gRPC 服务端 + Panel CA。
+	Registration RegistrationConf `json:"Registration,optional"`
+}
+
+// RegistrationConf 配置 RegistrationService gRPC 监听与 Panel CA（design §3.10）。
+type RegistrationConf struct {
+	Enabled    bool   `json:",default=false"`
+	ListenOn   string `json:",default=127.0.0.1:9101"`
+	Insecure   bool   `json:",default=true"`
+	CertFile   string `json:",optional"` // 服务端证书（server-auth TLS）
+	KeyFile    string `json:",optional"`
+	CAFile     string `json:",optional"` // 校验客户端证书（Renew）
+	CACertFile string `json:",optional"` // Panel CA 证书（签发）
+	CAKeyFile  string `json:",optional"` // Panel CA 私钥（签发）
 }
 
 // CoreControlConf 配置 core-control gRPC 客户端（随 Panel 部署，回环 / 内网）。

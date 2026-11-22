@@ -3,16 +3,60 @@ package registration
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"errors"
+	"os"
 
 	agentv1 "github.com/relayx-tech/contracts/gen/go/agent/v1"
+	"github.com/relayx-tech/panel/internal/config"
 	"github.com/relayx-tech/panel/internal/logic/register"
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/peer"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
+
+// NewGRPCServer 构造注册 gRPC 服务端；Insecure=false 时启用 server-auth TLS
+// （RequestClientCert：Register 无需客户端证书，Renew 有则校验并取 CN）。
+func NewGRPCServer(cfg config.RegistrationConf, svc *register.Service) (*grpc.Server, error) {
+	var opts []grpc.ServerOption
+	if !cfg.Insecure {
+		tlsCfg, err := registrationTLSConfig(cfg)
+		if err != nil {
+			return nil, err
+		}
+		opts = append(opts, grpc.Creds(credentials.NewTLS(tlsCfg)))
+	}
+	server := grpc.NewServer(opts...)
+	agentv1.RegisterRegistrationServiceServer(server, New(svc))
+	return server, nil
+}
+
+func registrationTLSConfig(cfg config.RegistrationConf) (*tls.Config, error) {
+	cert, err := tls.LoadX509KeyPair(cfg.CertFile, cfg.KeyFile)
+	if err != nil {
+		return nil, err
+	}
+	pool := x509.NewCertPool()
+	if cfg.CAFile != "" {
+		caPEM, err := os.ReadFile(cfg.CAFile)
+		if err != nil {
+			return nil, err
+		}
+		if !pool.AppendCertsFromPEM(caPEM) {
+			return nil, errors.New("客户端 CA PEM 解析失败")
+		}
+	}
+	return &tls.Config{
+		Certificates: []tls.Certificate{cert},
+		ClientCAs:    pool,
+		ClientAuth:   tls.RequestClientCert,
+		MinVersion:   tls.VersionTLS13,
+	}, nil
+}
 
 // Server 是 RegistrationService 的 gRPC 实现。
 type Server struct {

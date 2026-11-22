@@ -10,17 +10,22 @@ import (
 	"crypto/x509/pkix"
 	"encoding/pem"
 	"math/big"
+	"net"
 	"testing"
 	"time"
 
 	agentv1 "github.com/relayx-tech/contracts/gen/go/agent/v1"
+	"github.com/relayx-tech/panel/internal/config"
 	"github.com/relayx-tech/panel/internal/logic/register"
 	"github.com/relayx-tech/panel/internal/pki"
 	registration "github.com/relayx-tech/panel/internal/server/registration"
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/peer"
 	"google.golang.org/grpc/status"
+	"google.golang.org/grpc/test/bufconn"
 )
 
 func newCA(t *testing.T) *pki.CA {
@@ -132,5 +137,43 @@ func TestErrorMapping(t *testing.T) {
 	_, err := srv.Register(context.Background(), &agentv1.RegisterRequest{Token: "bad", NodeId: "n", CsrPem: newCSR(t)})
 	if status.Code(err) != codes.Unauthenticated {
 		t.Fatalf("无效 Token 应 Unauthenticated, got %v", status.Code(err))
+	}
+}
+
+// BE-29：NewGRPCServer 启动后经 bufconn 可完成注册。
+func TestNewGRPCServerServes(t *testing.T) {
+	_, svc := newServer(t)
+	lis := bufconn.Listen(1024 * 1024)
+	srv, err := registration.NewGRPCServer(config.RegistrationConf{Insecure: true}, svc)
+	if err != nil {
+		t.Fatal(err)
+	}
+	go func() { _ = srv.Serve(lis) }()
+	t.Cleanup(srv.Stop)
+
+	conn, err := grpc.NewClient("passthrough:///bufnet",
+		grpc.WithContextDialer(func(ctx context.Context, _ string) (net.Conn, error) {
+			return lis.DialContext(ctx)
+		}),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = conn.Close() })
+
+	client := agentv1.NewRegistrationServiceClient(conn)
+	token, err := svc.CreateToken(context.Background(), "entry")
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp, err := client.Register(context.Background(), &agentv1.RegisterRequest{
+		Token: token, NodeId: "node-1", NodeType: agentv1.AgentNodeType_AGENT_NODE_TYPE_ENTRY, CsrPem: newCSR(t),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(resp.GetCertChainPem()) == 0 {
+		t.Fatal("未返回证书链")
 	}
 }

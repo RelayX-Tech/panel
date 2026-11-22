@@ -57,6 +57,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: relayx-tech/contracts
+          ref: ${{ github.head_ref || github.ref_name }}
           path: contracts
           token: ${{ secrets.RELAYX_CI_TOKEN || github.token }}
 

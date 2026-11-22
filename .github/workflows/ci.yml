@@ -58,7 +58,7 @@ jobs:
         with:
           repository: relayx-tech/contracts
           path: contracts
-          token: ${{ secrets.RELAYX_CI_TOKEN }}
+          token: ${{ secrets.RELAYX_CI_TOKEN || github.token }}
 
       - name: setup go
         uses: actions/setup-go@v5

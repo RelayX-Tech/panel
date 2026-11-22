@@ -3,46 +3,157 @@
 package errcode
 
 const (
+	AUTH_CERT_REVOKED                   = "AUTH_CERT_REVOKED"
 	AUTH_CSRF_REJECTED                  = "AUTH_CSRF_REJECTED"
 	AUTH_INVALID_CREDENTIALS            = "AUTH_INVALID_CREDENTIALS"
+	AUTH_REPLAY_REJECTED                = "AUTH_REPLAY_REJECTED"
 	AUTH_SESSION_EXPIRED                = "AUTH_SESSION_EXPIRED"
+	AUTH_SIGNATURE_INVALID              = "AUTH_SIGNATURE_INVALID"
+	AUTH_TOKEN_EXPIRED                  = "AUTH_TOKEN_EXPIRED"
+	AUTH_TOKEN_INVALID                  = "AUTH_TOKEN_INVALID"
+	AUTH_TOKEN_USED                     = "AUTH_TOKEN_USED"
+	AUTH_UNAUTHENTICATED                = "AUTH_UNAUTHENTICATED"
 	AUTH_UNAUTHORIZED                   = "AUTH_UNAUTHORIZED"
+	CERT_ISSUE_FAILED                   = "CERT_ISSUE_FAILED"
+	CONFIG_APPLY_FAILED                 = "CONFIG_APPLY_FAILED"
+	CONFIG_HASH_MISMATCH                = "CONFIG_HASH_MISMATCH"
+	CONFIG_INVALID                      = "CONFIG_INVALID"
+	CONFIG_ROLLBACK_FAILED              = "CONFIG_ROLLBACK_FAILED"
+	CONFIG_TEST_FAILED                  = "CONFIG_TEST_FAILED"
+	CONFIG_TIMEOUT                      = "CONFIG_TIMEOUT"
+	CONFIG_TOO_LARGE                    = "CONFIG_TOO_LARGE"
+	CONFIG_VERSION_STALE                = "CONFIG_VERSION_STALE"
+	CSR_INVALID                         = "CSR_INVALID"
+	INTERFACE_NOT_FOUND                 = "INTERFACE_NOT_FOUND"
 	INTERNAL                            = "INTERNAL"
+	KERNEL_NOT_RUNNING                  = "KERNEL_NOT_RUNNING"
+	KERNEL_RELOAD_FAILED                = "KERNEL_RELOAD_FAILED"
+	KERNEL_START_FAILED                 = "KERNEL_START_FAILED"
+	KERNEL_UNHEALTHY                    = "KERNEL_UNHEALTHY"
+	NODE_ALREADY_REGISTERED             = "NODE_ALREADY_REGISTERED"
+	NODE_NOT_FOUND                      = "NODE_NOT_FOUND"
+	NODE_TYPE_MISMATCH                  = "NODE_TYPE_MISMATCH"
 	OK                                  = "OK"
+	OPERATION_CONFLICT                  = "OPERATION_CONFLICT"
+	OPERATION_IN_PROGRESS               = "OPERATION_IN_PROGRESS"
+	PERCEPTION_UNAVAILABLE              = "PERCEPTION_UNAVAILABLE"
+	PORT_CONFLICT                       = "PORT_CONFLICT"
+	PROBE_FAILED                        = "PROBE_FAILED"
+	PROBE_TIMEOUT                       = "PROBE_TIMEOUT"
 	RATE_LIMITED                        = "RATE_LIMITED"
+	TUNNEL_MAPPING_INVALID              = "TUNNEL_MAPPING_INVALID"
+	TUNNEL_PORT_CONFLICT                = "TUNNEL_PORT_CONFLICT"
 	VALIDATION_INVALID_FIELD            = "VALIDATION_INVALID_FIELD"
 	VALIDATION_INVALID_NEW_PASSWORD     = "VALIDATION_INVALID_NEW_PASSWORD"
 	VALIDATION_INVALID_OLD_PASSWORD     = "VALIDATION_INVALID_OLD_PASSWORD"
+	VALIDATION_INVALID_PORT             = "VALIDATION_INVALID_PORT"
+	VALIDATION_MATERIAL_MISSING         = "VALIDATION_MATERIAL_MISSING"
 	VALIDATION_MISSING_FIELD            = "VALIDATION_MISSING_FIELD"
 	VALIDATION_NEW_PASSWORD_SAME_AS_OLD = "VALIDATION_NEW_PASSWORD_SAME_AS_OLD"
+	VALIDATION_UNSUPPORTED_COMBINATION  = "VALIDATION_UNSUPPORTED_COMBINATION"
+	VERSION_INCOMPATIBLE                = "VERSION_INCOMPATIBLE"
 )
 
 var HTTPStatus = map[string]int{
+	"AUTH_CERT_REVOKED":                   403,
 	"AUTH_CSRF_REJECTED":                  403,
 	"AUTH_INVALID_CREDENTIALS":            401,
+	"AUTH_REPLAY_REJECTED":                401,
 	"AUTH_SESSION_EXPIRED":                401,
+	"AUTH_SIGNATURE_INVALID":              401,
+	"AUTH_TOKEN_EXPIRED":                  401,
+	"AUTH_TOKEN_INVALID":                  401,
+	"AUTH_TOKEN_USED":                     401,
+	"AUTH_UNAUTHENTICATED":                401,
 	"AUTH_UNAUTHORIZED":                   401,
+	"CERT_ISSUE_FAILED":                   500,
+	"CONFIG_APPLY_FAILED":                 500,
+	"CONFIG_HASH_MISMATCH":                409,
+	"CONFIG_INVALID":                      400,
+	"CONFIG_ROLLBACK_FAILED":              500,
+	"CONFIG_TEST_FAILED":                  422,
+	"CONFIG_TIMEOUT":                      504,
+	"CONFIG_TOO_LARGE":                    413,
+	"CONFIG_VERSION_STALE":                409,
+	"CSR_INVALID":                         400,
+	"INTERFACE_NOT_FOUND":                 404,
 	"INTERNAL":                            500,
+	"KERNEL_NOT_RUNNING":                  409,
+	"KERNEL_RELOAD_FAILED":                500,
+	"KERNEL_START_FAILED":                 500,
+	"KERNEL_UNHEALTHY":                    503,
+	"NODE_ALREADY_REGISTERED":             409,
+	"NODE_NOT_FOUND":                      404,
+	"NODE_TYPE_MISMATCH":                  409,
 	"OK":                                  200,
+	"OPERATION_CONFLICT":                  409,
+	"OPERATION_IN_PROGRESS":               409,
+	"PERCEPTION_UNAVAILABLE":              503,
+	"PORT_CONFLICT":                       409,
+	"PROBE_FAILED":                        502,
+	"PROBE_TIMEOUT":                       504,
 	"RATE_LIMITED":                        429,
+	"TUNNEL_MAPPING_INVALID":              400,
+	"TUNNEL_PORT_CONFLICT":                409,
 	"VALIDATION_INVALID_FIELD":            400,
 	"VALIDATION_INVALID_NEW_PASSWORD":     400,
 	"VALIDATION_INVALID_OLD_PASSWORD":     400,
+	"VALIDATION_INVALID_PORT":             400,
+	"VALIDATION_MATERIAL_MISSING":         400,
 	"VALIDATION_MISSING_FIELD":            400,
 	"VALIDATION_NEW_PASSWORD_SAME_AS_OLD": 400,
+	"VALIDATION_UNSUPPORTED_COMBINATION":  400,
+	"VERSION_INCOMPATIBLE":                426,
 }
 
 var I18nKey = map[string]string{
+	"AUTH_CERT_REVOKED":                   "errors.AUTH_CERT_REVOKED",
 	"AUTH_CSRF_REJECTED":                  "errors.AUTH_CSRF_REJECTED",
 	"AUTH_INVALID_CREDENTIALS":            "errors.AUTH_INVALID_CREDENTIALS",
+	"AUTH_REPLAY_REJECTED":                "errors.AUTH_REPLAY_REJECTED",
 	"AUTH_SESSION_EXPIRED":                "errors.AUTH_SESSION_EXPIRED",
+	"AUTH_SIGNATURE_INVALID":              "errors.AUTH_SIGNATURE_INVALID",
+	"AUTH_TOKEN_EXPIRED":                  "errors.AUTH_TOKEN_EXPIRED",
+	"AUTH_TOKEN_INVALID":                  "errors.AUTH_TOKEN_INVALID",
+	"AUTH_TOKEN_USED":                     "errors.AUTH_TOKEN_USED",
+	"AUTH_UNAUTHENTICATED":                "errors.AUTH_UNAUTHENTICATED",
 	"AUTH_UNAUTHORIZED":                   "errors.AUTH_UNAUTHORIZED",
+	"CERT_ISSUE_FAILED":                   "errors.CERT_ISSUE_FAILED",
+	"CONFIG_APPLY_FAILED":                 "errors.CONFIG_APPLY_FAILED",
+	"CONFIG_HASH_MISMATCH":                "errors.CONFIG_HASH_MISMATCH",
+	"CONFIG_INVALID":                      "errors.CONFIG_INVALID",
+	"CONFIG_ROLLBACK_FAILED":              "errors.CONFIG_ROLLBACK_FAILED",
+	"CONFIG_TEST_FAILED":                  "errors.CONFIG_TEST_FAILED",
+	"CONFIG_TIMEOUT":                      "errors.CONFIG_TIMEOUT",
+	"CONFIG_TOO_LARGE":                    "errors.CONFIG_TOO_LARGE",
+	"CONFIG_VERSION_STALE":                "errors.CONFIG_VERSION_STALE",
+	"CSR_INVALID":                         "errors.CSR_INVALID",
+	"INTERFACE_NOT_FOUND":                 "errors.INTERFACE_NOT_FOUND",
 	"INTERNAL":                            "errors.INTERNAL",
+	"KERNEL_NOT_RUNNING":                  "errors.KERNEL_NOT_RUNNING",
+	"KERNEL_RELOAD_FAILED":                "errors.KERNEL_RELOAD_FAILED",
+	"KERNEL_START_FAILED":                 "errors.KERNEL_START_FAILED",
+	"KERNEL_UNHEALTHY":                    "errors.KERNEL_UNHEALTHY",
+	"NODE_ALREADY_REGISTERED":             "errors.NODE_ALREADY_REGISTERED",
+	"NODE_NOT_FOUND":                      "errors.NODE_NOT_FOUND",
+	"NODE_TYPE_MISMATCH":                  "errors.NODE_TYPE_MISMATCH",
 	"OK":                                  "errors.OK",
+	"OPERATION_CONFLICT":                  "errors.OPERATION_CONFLICT",
+	"OPERATION_IN_PROGRESS":               "errors.OPERATION_IN_PROGRESS",
+	"PERCEPTION_UNAVAILABLE":              "errors.PERCEPTION_UNAVAILABLE",
+	"PORT_CONFLICT":                       "errors.PORT_CONFLICT",
+	"PROBE_FAILED":                        "errors.PROBE_FAILED",
+	"PROBE_TIMEOUT":                       "errors.PROBE_TIMEOUT",
 	"RATE_LIMITED":                        "errors.RATE_LIMITED",
+	"TUNNEL_MAPPING_INVALID":              "errors.TUNNEL_MAPPING_INVALID",
+	"TUNNEL_PORT_CONFLICT":                "errors.TUNNEL_PORT_CONFLICT",
 	"VALIDATION_INVALID_FIELD":            "errors.VALIDATION_INVALID_FIELD",
 	"VALIDATION_INVALID_NEW_PASSWORD":     "errors.VALIDATION_INVALID_NEW_PASSWORD",
 	"VALIDATION_INVALID_OLD_PASSWORD":     "errors.VALIDATION_INVALID_OLD_PASSWORD",
+	"VALIDATION_INVALID_PORT":             "errors.VALIDATION_INVALID_PORT",
+	"VALIDATION_MATERIAL_MISSING":         "errors.VALIDATION_MATERIAL_MISSING",
 	"VALIDATION_MISSING_FIELD":            "errors.VALIDATION_MISSING_FIELD",
 	"VALIDATION_NEW_PASSWORD_SAME_AS_OLD": "errors.VALIDATION_NEW_PASSWORD_SAME_AS_OLD",
+	"VALIDATION_UNSUPPORTED_COMBINATION":  "errors.VALIDATION_UNSUPPORTED_COMBINATION",
+	"VERSION_INCOMPATIBLE":                "errors.VERSION_INCOMPATIBLE",
 }

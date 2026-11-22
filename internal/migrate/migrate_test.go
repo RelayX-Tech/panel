@@ -3,10 +3,12 @@ package migrate
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"testing"
 	"testing/fstest"
 	"time"
 
+	"github.com/pressly/goose/v3"
 	"github.com/relayx-tech/panel/internal/testsupport"
 	"github.com/relayx-tech/panel/migrations"
 )
@@ -249,7 +251,15 @@ func TestPasswordAuditMigrationUpDown(t *testing.T) {
 		}
 	}
 
-	if err := Down(ctx, db, migrations.FS); err != nil {
+	// 回滚全部迁移（goose Down 每次只回滚最新一个，迁移数量会随需求增长）。
+	for {
+		err := Down(ctx, db, migrations.FS)
+		if err == nil {
+			continue
+		}
+		if errors.Is(err, goose.ErrNoNextVersion) {
+			break
+		}
 		t.Fatalf("down: %v", err)
 	}
 	if err := db.QueryRow(`SELECT to_regclass('public.auth_password_audits') IS NOT NULL`).Scan(&exists); err != nil {

@@ -17,6 +17,32 @@ type Config struct {
 	Auth     AuthConf        `json:"Auth"`
 	Database DatabaseConf    `json:"Database,optional"`
 	Cache    cache.CacheConf `json:"Cache,optional"`
+
+	// STO-002 下发编排：core-control / Agent gRPC 客户端。
+	CoreControl CoreControlConf `json:"CoreControl,optional"`
+	Agent       AgentConf       `json:"Agent,optional"`
+}
+
+// CoreControlConf 配置 core-control gRPC 客户端（随 Panel 部署，回环 / 内网）。
+type CoreControlConf struct {
+	Endpoints  []string      `json:",optional"`
+	Timeout    time.Duration `json:",default=35s"`
+	Insecure   bool          `json:",default=true"`
+	CertFile   string        `json:",optional"`
+	KeyFile    string        `json:",optional"`
+	CAFile     string        `json:",optional"`
+	ServerName string        `json:",optional"`
+}
+
+// AgentConf 配置 Agent gRPC 客户端（每节点一个）。
+type AgentConf struct {
+	Endpoints  []string      `json:",optional"`
+	Timeout    time.Duration `json:",default=35s"`
+	Insecure   bool          `json:",default=true"`
+	CertFile   string        `json:",optional"`
+	KeyFile    string        `json:",optional"`
+	CAFile     string        `json:",optional"`
+	ServerName string        `json:",optional"`
 }
 
 // AuthConf 管理面认证与会话相关配置（design.md §4.6）。

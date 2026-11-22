@@ -16,6 +16,7 @@ import (
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/zeromicro/go-zero/rest"
 
+	agentv1 "github.com/relayx-tech/contracts/gen/go/agent/v1"
 	"github.com/relayx-tech/panel/internal/config"
 	"github.com/relayx-tech/panel/internal/handler"
 	"github.com/relayx-tech/panel/internal/health"
@@ -90,16 +91,39 @@ func main() {
 	server.Use(middleware.AccessLog())
 	server.Use(middleware.SecurityHeaders())
 
-	server.AddRoutes([]rest.Route{
-		{Method: "GET", Path: "/healthz", Handler: health.Healthz()},
-		{Method: "GET", Path: "/readyz", Handler: health.Readyz(func() error {
+	svcCtx := svc.NewServiceContext(c, conn, c.Cache)
+
+	// readyz：DB / 迁移 /（已配置时）core-control 与 Agent 可达性。
+	readyzChecks := []func() error{
+		func() error {
 			ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 			defer cancel()
 			return db.PingContext(ctx)
-		}, migrate.ReadyCheck(db, migrations.FS))},
+		},
+		migrate.ReadyCheck(db, migrations.FS),
+	}
+	if svcCtx.CoreControl != nil {
+		readyzChecks = append(readyzChecks, func() error {
+			ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+			defer cancel()
+			_, err := svcCtx.CoreControl.Health(ctx)
+			return err
+		})
+	}
+	if svcCtx.Agent != nil {
+		readyzChecks = append(readyzChecks, func() error {
+			ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+			defer cancel()
+			_, err := svcCtx.Agent.Health(ctx, &agentv1.AgentHealthRequest{})
+			return err
+		})
+	}
+
+	server.AddRoutes([]rest.Route{
+		{Method: "GET", Path: "/healthz", Handler: health.Healthz()},
+		{Method: "GET", Path: "/readyz", Handler: health.Readyz(readyzChecks...)},
 	})
 
-	svcCtx := svc.NewServiceContext(c, conn, c.Cache)
 	handler.RegisterHandlers(server, svcCtx)
 
 	startSessionCleanup(svcCtx)

@@ -5,12 +5,21 @@ package svc
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
+	"fmt"
+	"os"
 
 	"github.com/zeromicro/go-zero/core/stores/cache"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/zeromicro/go-zero/rest"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/relayx-tech/panel/internal/auth"
+	agentclient "github.com/relayx-tech/panel/internal/client/agent"
+	"github.com/relayx-tech/panel/internal/client/corecontrol"
 	"github.com/relayx-tech/panel/internal/config"
 	"github.com/relayx-tech/panel/internal/middleware"
 	"github.com/relayx-tech/panel/internal/model"
@@ -36,6 +45,10 @@ type ServiceContext struct {
 	OriginCheck    rest.Middleware
 	LoginRateLimit rest.Middleware
 	Auth           rest.Middleware
+
+	// STO-002 下发编排客户端（未配置端点时为 nil）。
+	CoreControl *corecontrol.Client
+	Agent       *agentclient.Client
 }
 
 func NewServiceContext(c config.Config, conn sqlx.SqlConn, cacheConf cache.CacheConf) *ServiceContext {
@@ -59,6 +72,8 @@ func NewServiceContext(c config.Config, conn sqlx.SqlConn, cacheConf cache.Cache
 		)
 	}
 
+	coreControl, agentClient := dialDispatchClients(c)
+
 	return &ServiceContext{
 		Config:          c,
 		DB:              conn,
@@ -71,7 +86,54 @@ func NewServiceContext(c config.Config, conn sqlx.SqlConn, cacheConf cache.Cache
 		OriginCheck:     middleware.NewOriginCheckMiddleware(c.Auth.AllowedOrigins).Handle,
 		LoginRateLimit:  rateLimiter.Handle,
 		Auth:            middleware.NewAuthMiddleware(manager, c.Auth.SessionCookieName).Handle,
+		CoreControl:     coreControl,
+		Agent:           agentClient,
 	}
+}
+
+// dialDispatchClients 按配置建立 core-control / Agent 客户端；未配置端点返回 nil。
+func dialDispatchClients(c config.Config) (*corecontrol.Client, *agentclient.Client) {
+	var coreControl *corecontrol.Client
+	if len(c.CoreControl.Endpoints) > 0 {
+		if opts, err := dialOptions(c.CoreControl.Insecure, c.CoreControl.CertFile, c.CoreControl.KeyFile, c.CoreControl.CAFile, c.CoreControl.ServerName); err == nil {
+			if client, derr := corecontrol.Dial(c.CoreControl.Endpoints[0], opts...); derr == nil {
+				coreControl = client
+			}
+		}
+	}
+	var agentClient *agentclient.Client
+	if len(c.Agent.Endpoints) > 0 {
+		if opts, err := dialOptions(c.Agent.Insecure, c.Agent.CertFile, c.Agent.KeyFile, c.Agent.CAFile, c.Agent.ServerName); err == nil {
+			if client, derr := agentclient.Dial(c.Agent.Endpoints[0], opts...); derr == nil {
+				agentClient = client
+			}
+		}
+	}
+	return coreControl, agentClient
+}
+
+func dialOptions(insecureMode bool, certFile, keyFile, caFile, serverName string) ([]grpc.DialOption, error) {
+	if insecureMode {
+		return []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}, nil
+	}
+	cfg := &tls.Config{MinVersion: tls.VersionTLS13, ServerName: serverName}
+	if certFile != "" && keyFile != "" && caFile != "" {
+		cert, err := tls.LoadX509KeyPair(certFile, keyFile)
+		if err != nil {
+			return nil, err
+		}
+		caPEM, err := os.ReadFile(caFile)
+		if err != nil {
+			return nil, err
+		}
+		pool := x509.NewCertPool()
+		if !pool.AppendCertsFromPEM(caPEM) {
+			return nil, fmt.Errorf("CA PEM 解析失败: %s", caFile)
+		}
+		cfg.Certificates = []tls.Certificate{cert}
+		cfg.RootCAs = pool
+	}
+	return []grpc.DialOption{grpc.WithTransportCredentials(credentials.NewTLS(cfg))}, nil
 }
 
 // CookieConfig 返回会话 Cookie 的传输配置。

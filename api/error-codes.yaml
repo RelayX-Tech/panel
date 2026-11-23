@@ -94,3 +94,301 @@
   deprecated: false
   message: "服务内部错误"
   messageEn: "Internal server error"
+# STO-002 下发编排（由 contracts/errors/v1/error-codes.yaml 派生 HTTP / i18n 映射）
+- code: VALIDATION_INVALID_PORT
+  http: 400
+  i18n: errors.VALIDATION_INVALID_PORT
+  owner: backend-panel
+  since: "2026-11-22"
+  deprecated: false
+  message: "端口不合法"
+  messageEn: "Invalid port"
+- code: VALIDATION_UNSUPPORTED_COMBINATION
+  http: 400
+  i18n: errors.VALIDATION_UNSUPPORTED_COMBINATION
+  owner: backend-panel
+  since: "2026-11-22"
+  deprecated: false
+  message: "协议、传输与安全组合不受支持"
+  messageEn: "Unsupported protocol/transport/security combination"
+- code: VALIDATION_MATERIAL_MISSING
+  http: 400
+  i18n: errors.VALIDATION_MATERIAL_MISSING
+  owner: backend-panel
+  since: "2026-11-22"
+  deprecated: false
+  message: "证书、私钥、UUID 或 shortId 缺失"
+  messageEn: "Required material is missing"
+- code: CONFIG_INVALID
+  http: 400
+  i18n: errors.CONFIG_INVALID
+  owner: backend-panel
+  since: "2026-11-22"
+  deprecated: false
+  message: "配置整体非法"
+  messageEn: "Invalid configuration"
+- code: CONFIG_HASH_MISMATCH
+  http: 409
+  i18n: errors.CONFIG_HASH_MISMATCH
+  owner: backend-panel
+  since: "2026-11-22"
+  deprecated: false
+  message: "下发配置哈希与内容不一致"
+  messageEn: "Config hash does not match content"
+- code: CONFIG_TEST_FAILED
+  http: 422
+  i18n: errors.CONFIG_TEST_FAILED
+  owner: backend-panel
+  since: "2026-11-22"
+  deprecated: false
+  message: "配置测试失败"
+  messageEn: "Configuration test failed"
+- code: CONFIG_APPLY_FAILED
+  http: 500
+  i18n: errors.CONFIG_APPLY_FAILED
+  owner: backend-panel
+  since: "2026-11-22"
+  deprecated: false
+  message: "配置应用失败，已尝试恢复"
+  messageEn: "Failed to apply configuration; recovery attempted"
+- code: CONFIG_ROLLBACK_FAILED
+  http: 500
+  i18n: errors.CONFIG_ROLLBACK_FAILED
+  owner: backend-panel
+  since: "2026-11-22"
+  deprecated: false
+  message: "配置回滚失败，需人工介入"
+  messageEn: "Rollback failed; manual intervention required"
+- code: CONFIG_TIMEOUT
+  http: 504
+  i18n: errors.CONFIG_TIMEOUT
+  owner: backend-panel
+  since: "2026-11-22"
+  deprecated: false
+  message: "配置应用超时"
+  messageEn: "Configuration apply timed out"
+- code: CONFIG_TOO_LARGE
+  http: 413
+  i18n: errors.CONFIG_TOO_LARGE
+  owner: backend-panel
+  since: "2026-11-22"
+  deprecated: false
+  message: "配置体积超过上限"
+  messageEn: "Configuration exceeds size limit"
+- code: CONFIG_VERSION_STALE
+  http: 409
+  i18n: errors.CONFIG_VERSION_STALE
+  owner: backend-panel
+  since: "2026-11-22"
+  deprecated: false
+  message: "配置版本不高于当前版本"
+  messageEn: "Config version is not newer than current"
+- code: OPERATION_CONFLICT
+  http: 409
+  i18n: errors.OPERATION_CONFLICT
+  owner: backend-panel
+  since: "2026-11-22"
+  deprecated: false
+  message: "operation_id 复用了不同内容"
+  messageEn: "operation_id reused with different payload"
+- code: OPERATION_IN_PROGRESS
+  http: 409
+  i18n: errors.OPERATION_IN_PROGRESS
+  owner: backend-panel
+  since: "2026-11-22"
+  deprecated: false
+  message: "同节点存在进行中的应用操作"
+  messageEn: "Apply already in progress for this node"
+- code: VERSION_INCOMPATIBLE
+  http: 426
+  i18n: errors.VERSION_INCOMPATIBLE
+  owner: backend-panel
+  since: "2026-11-22"
+  deprecated: false
+  message: "合同或组件版本不兼容"
+  messageEn: "Incompatible contract or component version"
+- code: AUTH_UNAUTHENTICATED
+  http: 401
+  i18n: errors.AUTH_UNAUTHENTICATED
+  owner: backend-panel
+  since: "2026-11-22"
+  deprecated: false
+  message: "认证失败"
+  messageEn: "Authentication failed"
+- code: AUTH_SIGNATURE_INVALID
+  http: 401
+  i18n: errors.AUTH_SIGNATURE_INVALID
+  owner: backend-panel
+  since: "2026-11-22"
+  deprecated: false
+  message: "请求签名无效"
+  messageEn: "Invalid request signature"
+- code: AUTH_REPLAY_REJECTED
+  http: 401
+  i18n: errors.AUTH_REPLAY_REJECTED
+  owner: backend-panel
+  since: "2026-11-22"
+  deprecated: false
+  message: "时间戳或 nonce 重放被拒绝"
+  messageEn: "Replayed timestamp or nonce rejected"
+- code: AUTH_CERT_REVOKED
+  http: 403
+  i18n: errors.AUTH_CERT_REVOKED
+  owner: backend-panel
+  since: "2026-11-22"
+  deprecated: false
+  message: "证书已吊销"
+  messageEn: "Certificate revoked"
+- code: NODE_NOT_FOUND
+  http: 404
+  i18n: errors.NODE_NOT_FOUND
+  owner: backend-panel
+  since: "2026-11-22"
+  deprecated: false
+  message: "节点不存在"
+  messageEn: "Node not found"
+- code: NODE_TYPE_MISMATCH
+  http: 409
+  i18n: errors.NODE_TYPE_MISMATCH
+  owner: backend-panel
+  since: "2026-11-22"
+  deprecated: false
+  message: "节点类型不符"
+  messageEn: "Node type mismatch"
+- code: PORT_CONFLICT
+  http: 409
+  i18n: errors.PORT_CONFLICT
+  owner: backend-panel
+  since: "2026-11-22"
+  deprecated: false
+  message: "端口冲突"
+  messageEn: "Port conflict"
+- code: TUNNEL_MAPPING_INVALID
+  http: 400
+  i18n: errors.TUNNEL_MAPPING_INVALID
+  owner: backend-panel
+  since: "2026-11-22"
+  deprecated: false
+  message: "隧道映射缺失或重复"
+  messageEn: "Invalid tunnel mapping"
+- code: TUNNEL_PORT_CONFLICT
+  http: 409
+  i18n: errors.TUNNEL_PORT_CONFLICT
+  owner: backend-panel
+  since: "2026-11-22"
+  deprecated: false
+  message: "隧道端口冲突"
+  messageEn: "Tunnel port conflict"
+- code: INTERFACE_NOT_FOUND
+  http: 404
+  i18n: errors.INTERFACE_NOT_FOUND
+  owner: backend-panel
+  since: "2026-11-22"
+  deprecated: false
+  message: "显式网卡不存在"
+  messageEn: "Network interface not found"
+- code: KERNEL_NOT_RUNNING
+  http: 409
+  i18n: errors.KERNEL_NOT_RUNNING
+  owner: backend-panel
+  since: "2026-11-22"
+  deprecated: false
+  message: "内核未运行"
+  messageEn: "Kernel is not running"
+- code: KERNEL_START_FAILED
+  http: 500
+  i18n: errors.KERNEL_START_FAILED
+  owner: backend-panel
+  since: "2026-11-22"
+  deprecated: false
+  message: "内核启动失败"
+  messageEn: "Kernel failed to start"
+- code: KERNEL_RELOAD_FAILED
+  http: 500
+  i18n: errors.KERNEL_RELOAD_FAILED
+  owner: backend-panel
+  since: "2026-11-22"
+  deprecated: false
+  message: "内核重载失败"
+  messageEn: "Kernel reload failed"
+- code: KERNEL_UNHEALTHY
+  http: 503
+  i18n: errors.KERNEL_UNHEALTHY
+  owner: backend-panel
+  since: "2026-11-22"
+  deprecated: false
+  message: "内核健康检查失败"
+  messageEn: "Kernel is unhealthy"
+- code: PERCEPTION_UNAVAILABLE
+  http: 503
+  i18n: errors.PERCEPTION_UNAVAILABLE
+  owner: backend-panel
+  since: "2026-11-22"
+  deprecated: false
+  message: "内核感知数据不可用"
+  messageEn: "Perception data unavailable"
+- code: PROBE_FAILED
+  http: 502
+  i18n: errors.PROBE_FAILED
+  owner: backend-panel
+  since: "2026-11-22"
+  deprecated: false
+  message: "探测失败"
+  messageEn: "Probe failed"
+- code: PROBE_TIMEOUT
+  http: 504
+  i18n: errors.PROBE_TIMEOUT
+  owner: backend-panel
+  since: "2026-11-22"
+  deprecated: false
+  message: "探测超时"
+  messageEn: "Probe timed out"
+# 节点注册（design §3.10）
+- code: AUTH_TOKEN_INVALID
+  http: 401
+  i18n: errors.AUTH_TOKEN_INVALID
+  owner: backend-panel
+  since: "2026-11-22"
+  deprecated: false
+  message: "注册 Token 不存在或错误"
+  messageEn: "Invalid registration token"
+- code: AUTH_TOKEN_EXPIRED
+  http: 401
+  i18n: errors.AUTH_TOKEN_EXPIRED
+  owner: backend-panel
+  since: "2026-11-22"
+  deprecated: false
+  message: "注册 Token 已过期"
+  messageEn: "Registration token expired"
+- code: AUTH_TOKEN_USED
+  http: 401
+  i18n: errors.AUTH_TOKEN_USED
+  owner: backend-panel
+  since: "2026-11-22"
+  deprecated: false
+  message: "注册 Token 已使用"
+  messageEn: "Registration token already used"
+- code: NODE_ALREADY_REGISTERED
+  http: 409
+  i18n: errors.NODE_ALREADY_REGISTERED
+  owner: backend-panel
+  since: "2026-11-22"
+  deprecated: false
+  message: "节点已注册且未吊销"
+  messageEn: "Node is already registered"
+- code: CSR_INVALID
+  http: 400
+  i18n: errors.CSR_INVALID
+  owner: backend-panel
+  since: "2026-11-22"
+  deprecated: false
+  message: "CSR 解析或签名非法"
+  messageEn: "Invalid certificate signing request"
+- code: CERT_ISSUE_FAILED
+  http: 500
+  i18n: errors.CERT_ISSUE_FAILED
+  owner: backend-panel
+  since: "2026-11-22"
+  deprecated: false
+  message: "证书签发失败"
+  messageEn: "Certificate issuance failed"

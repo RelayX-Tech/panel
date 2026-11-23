@@ -96,7 +96,10 @@ func ValidateAll(codes []Code) error {
 func allowedHTTP(code int) bool {
 	switch code {
 	case http.StatusOK, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden,
-		http.StatusNotFound, http.StatusConflict, http.StatusTooManyRequests, http.StatusInternalServerError:
+		http.StatusNotFound, http.StatusConflict, http.StatusRequestEntityTooLarge,
+		http.StatusUnprocessableEntity, http.StatusUpgradeRequired, http.StatusTooManyRequests,
+		http.StatusInternalServerError, http.StatusBadGateway, http.StatusServiceUnavailable,
+		http.StatusGatewayTimeout:
 		return true
 	default:
 		return false

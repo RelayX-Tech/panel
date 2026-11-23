@@ -32,3 +32,28 @@ Database:
 Cache:
   - Host: 127.0.0.1:56379
     Type: node
+
+# STO-002 下发编排客户端（端点为空则对应客户端禁用；仅用于 readyz / 内部调用）。
+CoreControl:
+  Endpoints: ["127.0.0.1:9000"]
+  Timeout: 35s
+  Insecure: true          # 生产置 false 并配置 CertFile/KeyFile/CAFile/ServerName
+  # CertFile: /etc/relayx/tls/panel-client.crt
+  # KeyFile: /etc/relayx/tls/panel-client.key
+  # CAFile: /etc/relayx/tls/core-control-ca.crt
+  # ServerName: core-control
+Agent:
+  Endpoints: []           # 每节点地址，如 ["node1.example.com:9100"]
+  Timeout: 35s
+  Insecure: true
+
+# STO-002 节点注册 gRPC 服务（design §3.10）；需 Panel CA 与 RELAYX_MASTER_KEY。
+Registration:
+  Enabled: false
+  ListenOn: 127.0.0.1:9101
+  Insecure: true          # 生产置 false 并配置 CertFile/KeyFile/CAFile
+  # CertFile: /etc/relayx/tls/registration.crt
+  # KeyFile: /etc/relayx/tls/registration.key
+  # CAFile: /etc/relayx/tls/panel-ca.crt
+  # CACertFile: /etc/relayx/tls/panel-ca.crt
+  # CAKeyFile: /etc/relayx/tls/panel-ca.key

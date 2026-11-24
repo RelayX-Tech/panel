@@ -106,3 +106,1611 @@ service panel-api {
 	post /password (ChangePasswordReq) returns (ChangePasswordResp)
 }
 
+// =====================================================================
+// STO-004 控制台 / 监控中心 / 面板设置 / 在线升级（design.md §3.4）
+// =====================================================================
+// ---- 共用 DTO（design.md §3.3）----
+type CountPair {
+	online int `json:"online"`
+	total  int `json:"total"`
+}
+
+type ByStatusCount {
+	status string `json:"status"`
+	count  int    `json:"count"`
+}
+
+type NodeCounts {
+	entry  CountPair `json:"entry"`
+	tunnel CountPair `json:"tunnel"`
+}
+
+type PortGroupCounts {
+	byStatus []ByStatusCount `json:"byStatus"`
+}
+
+type AlertLevelCounts {
+	info     int `json:"info"`
+	warning  int `json:"warning"`
+	critical int `json:"critical"`
+}
+
+type AlertCounts {
+	active  int              `json:"active"`
+	byLevel AlertLevelCounts `json:"byLevel"`
+}
+
+type Throughput {
+	inBps  float64 `json:"inBps"`
+	outBps float64 `json:"outBps"`
+}
+
+type TimePoint {
+	ts    string  `json:"ts"`
+	value float64 `json:"value"`
+}
+
+type TrafficSeries {
+	up   []TimePoint `json:"up"`
+	down []TimePoint `json:"down"`
+}
+
+type CompatibilityInfo {
+	contractMajor   int    `json:"contractMajor"`
+	schemaVersion   string `json:"schemaVersion"`
+	agentMinVersion string `json:"agentMinVersion"`
+	agentMaxVersion string `json:"agentMaxVersion"`
+	compatible      bool   `json:"compatible"`
+}
+
+// ---- API-01 / API-02 控制台 ----
+type DashboardSummaryData {
+	nodes         NodeCounts      `json:"nodes"`
+	portGroups    PortGroupCounts `json:"portGroups"`
+	alerts        AlertCounts     `json:"alerts"`
+	clientsOnline int             `json:"clientsOnline"`
+	throughput    Throughput      `json:"throughput"`
+	updatedAt     string          `json:"updatedAt"`
+}
+
+type DashboardSummaryResp {
+	code      string               `json:"code"`
+	message   string               `json:"message"`
+	data      DashboardSummaryData `json:"data"`
+	requestId string               `json:"requestId"`
+}
+
+type DashboardTrafficReq {
+	timeRange string `form:"range,default=24h"`
+}
+
+type DashboardTrafficData {
+	timeRange string        `json:"range"`
+	unit      string        `json:"unit"`
+	series    TrafficSeries `json:"series"`
+}
+
+type DashboardTrafficResp {
+	code      string               `json:"code"`
+	message   string               `json:"message"`
+	data      DashboardTrafficData `json:"data"`
+	requestId string               `json:"requestId"`
+}
+
+// ---- API-03 监控总览 ----
+type OverviewCards {
+	activeAlerts  int     `json:"activeAlerts"`
+	onlineNodes   int     `json:"onlineNodes"`
+	onlineClients int     `json:"onlineClients"`
+	inBps         float64 `json:"inBps"`
+	outBps        float64 `json:"outBps"`
+	xrayAbnormal  int     `json:"xrayAbnormal"`
+}
+
+type AlertTrend {
+	info     []TimePoint `json:"info"`
+	warning  []TimePoint `json:"warning"`
+	critical []TimePoint `json:"critical"`
+}
+
+type NodeHealthNode {
+	nodeId     string  `json:"nodeId"`
+	nodeName   string  `json:"nodeName"`
+	status     string  `json:"status"`
+	cpuPercent float64 `json:"cpuPercent"`
+	memPercent float64 `json:"memPercent"`
+}
+
+type NodeHealthGroup {
+	groupType string           `json:"groupType"`
+	groupId   string           `json:"groupId"`
+	groupName string           `json:"groupName"`
+	nodes     []NodeHealthNode `json:"nodes"`
+}
+
+type TopPortGroup {
+	portGroupId   string `json:"portGroupId"`
+	portGroupName string `json:"portGroupName"`
+	totalBytes    int64  `json:"totalBytes"`
+	connections   int    `json:"connections"`
+}
+
+type RecentAlert {
+	id         int64  `json:"id"`
+	level      string `json:"level"`
+	alertType  string `json:"type"`
+	objectName string `json:"objectName"`
+	message    string `json:"message"`
+	lastSeenAt string `json:"lastSeenAt"`
+}
+
+type MonitoringOverviewReq {
+	timeRange string `form:"range,default=24h"`
+}
+
+type MonitoringOverviewData {
+	cards         OverviewCards     `json:"cards"`
+	traffic       TrafficSeries     `json:"traffic"`
+	alertTrend    AlertTrend        `json:"alertTrend"`
+	nodeHealth    []NodeHealthGroup `json:"nodeHealth"`
+	topPortGroups []TopPortGroup    `json:"topPortGroups"`
+	recentAlerts  []RecentAlert     `json:"recentAlerts"`
+}
+
+type MonitoringOverviewResp {
+	code      string                 `json:"code"`
+	message   string                 `json:"message"`
+	data      MonitoringOverviewData `json:"data"`
+	requestId string                 `json:"requestId"`
+}
+
+// ---- API-04 / API-05 / API-06 / API-07 / API-08 节点 ----
+type NodeSummary {
+	id             string  `json:"id"`
+	name           string  `json:"name"`
+	nodeType       string  `json:"type"`
+	groupId        string  `json:"groupId"`
+	groupName      string  `json:"groupName"`
+	region         string  `json:"region"`
+	ip             string  `json:"ip"`
+	status         string  `json:"status"`
+	displayState   string  `json:"displayState,optional"`
+	cpuPercent     float64 `json:"cpuPercent"`
+	memPercent     float64 `json:"memPercent"`
+	diskPercent    float64 `json:"diskPercent"`
+	load1          float64 `json:"load1"`
+	tcpConnections int     `json:"tcpConnections"`
+	netInBps       float64 `json:"netInBps"`
+	netOutBps      float64 `json:"netOutBps"`
+	xrayState      string  `json:"xrayState"`
+	restarts       int     `json:"restarts"`
+	lastSeenAt     string  `json:"lastSeenAt"`
+}
+
+type NodeListReq {
+	page     int    `form:"page,default=1"`
+	pageSize int    `form:"pageSize,default=20"`
+	nodeType string `form:"type,optional"`
+	status   string `form:"status,optional"`
+	groupId  string `form:"groupId,optional"`
+	region   string `form:"region,optional"`
+	q        string `form:"q,optional"`
+	sort     string `form:"sort,optional"`
+}
+
+type NodeListData {
+	items    []NodeSummary `json:"items"`
+	total    int           `json:"total"`
+	page     int           `json:"page"`
+	pageSize int           `json:"pageSize"`
+}
+
+type NodeListResp {
+	code      string       `json:"code"`
+	message   string       `json:"message"`
+	data      NodeListData `json:"data"`
+	requestId string       `json:"requestId"`
+}
+
+type NodeDetailReq {
+	id string `path:"id"`
+}
+
+type NodeNIC {
+	name      string   `json:"name"`
+	mac       string   `json:"mac"`
+	mtu       int      `json:"mtu"`
+	up        bool     `json:"up"`
+	addresses []string `json:"addresses"`
+}
+
+type NodeXray {
+	pid        int     `json:"pid"`
+	cpuPercent float64 `json:"cpuPercent"`
+	memBytes   int64   `json:"memBytes"`
+	restarts   int     `json:"restarts"`
+	inbounds   int     `json:"inbounds"`
+	outbounds  int     `json:"outbounds"`
+}
+
+type NodeProbeInfo {
+	probeType           string `json:"type"`
+	latencyMs           int64  `json:"latencyMs"`
+	success             bool   `json:"success"`
+	failures            int    `json:"failures"`
+	consecutiveFailures int    `json:"consecutiveFailures"`
+	checkedAt           string `json:"checkedAt"`
+}
+
+type NodeDetail {
+	id                  string        `json:"id"`
+	name                string        `json:"name"`
+	nodeType            string        `json:"type"`
+	groupId             string        `json:"groupId"`
+	groupName           string        `json:"groupName"`
+	region              string        `json:"region"`
+	ip                  string        `json:"ip"`
+	status              string        `json:"status"`
+	displayState        string        `json:"displayState,optional"`
+	cpuPercent          float64       `json:"cpuPercent"`
+	memPercent          float64       `json:"memPercent"`
+	diskPercent         float64       `json:"diskPercent"`
+	load1               float64       `json:"load1"`
+	tcpConnections      int           `json:"tcpConnections"`
+	netInBps            float64       `json:"netInBps"`
+	netOutBps           float64       `json:"netOutBps"`
+	xrayState           string        `json:"xrayState"`
+	restarts            int           `json:"restarts"`
+	lastSeenAt          string        `json:"lastSeenAt"`
+	agentVersion        string        `json:"agentVersion"`
+	xrayVersion         string        `json:"xrayVersion"`
+	certificateNotAfter string        `json:"certificateNotAfter"`
+	nics                []NodeNIC     `json:"nics"`
+	xray                NodeXray      `json:"xray"`
+	probe               NodeProbeInfo `json:"probe"`
+}
+
+type NodeDetailResp {
+	code      string     `json:"code"`
+	message   string     `json:"message"`
+	data      NodeDetail `json:"data"`
+	requestId string     `json:"requestId"`
+}
+
+type MetricSeries {
+	metric string      `json:"metric"`
+	unit   string      `json:"unit"`
+	points []TimePoint `json:"points"`
+}
+
+type NodeMetricsReq {
+	id        string `path:"id"`
+	timeRange string `form:"range,default=24h"`
+	metrics   string `form:"metrics,optional"`
+}
+
+type NodeMetricsData {
+	series []MetricSeries `json:"series"`
+}
+
+type NodeMetricsResp {
+	code      string          `json:"code"`
+	message   string          `json:"message"`
+	data      NodeMetricsData `json:"data"`
+	requestId string          `json:"requestId"`
+}
+
+type NodeEvent {
+	id         int64       `json:"id"`
+	nodeId     string      `json:"nodeId"`
+	eventType  string      `json:"type"`
+	level      string      `json:"level"`
+	message    string      `json:"message"`
+	metadata   interface{} `json:"metadata"`
+	occurredAt string      `json:"occurredAt"`
+}
+
+type NodeEventsReq {
+	id        string `path:"id"`
+	page      int    `form:"page,default=1"`
+	pageSize  int    `form:"pageSize,default=20"`
+	eventType string `form:"type,optional"`
+	from      string `form:"from,optional"`
+	to        string `form:"to,optional"`
+}
+
+type NodeEventsData {
+	items    []NodeEvent `json:"items"`
+	total    int         `json:"total"`
+	page     int         `json:"page"`
+	pageSize int         `json:"pageSize"`
+}
+
+type NodeEventsResp {
+	code      string         `json:"code"`
+	message   string         `json:"message"`
+	data      NodeEventsData `json:"data"`
+	requestId string         `json:"requestId"`
+}
+
+type NodeProbeReq {
+	id             string `path:"id"`
+	probeType      string `json:"type"`
+	target         string `json:"target"`
+	timeoutMs      int    `json:"timeoutMs,optional"`
+	expectedStatus int    `json:"expectedStatus,optional"`
+}
+
+type NodeProbeResult {
+	success    bool   `json:"success"`
+	latencyMs  int64  `json:"latencyMs"`
+	statusCode int    `json:"statusCode,optional"`
+	error      string `json:"error,optional"`
+}
+
+type NodeProbeResp {
+	code      string          `json:"code"`
+	message   string          `json:"message"`
+	data      NodeProbeResult `json:"data"`
+	requestId string          `json:"requestId"`
+}
+
+// ---- API-09 / API-10 告警 ----
+type AlertNotificationInfo {
+	status    string `json:"status"`
+	channel   string `json:"channel"`
+	errorCode string `json:"errorCode"`
+	sentAt    string `json:"sentAt"`
+}
+
+type Alert {
+	id           int64                  `json:"id"`
+	level        string                 `json:"level"`
+	alertType    string                 `json:"type"`
+	objectType   string                 `json:"objectType"`
+	objectId     string                 `json:"objectId"`
+	objectName   string                 `json:"objectName"`
+	message      string                 `json:"message"`
+	status       string                 `json:"status"`
+	firstSeenAt  string                 `json:"firstSeenAt"`
+	lastSeenAt   string                 `json:"lastSeenAt"`
+	resolvedAt   string                 `json:"resolvedAt,optional"`
+	notification *AlertNotificationInfo `json:"notification,optional"`
+}
+
+type AlertListReq {
+	page       int    `form:"page,default=1"`
+	pageSize   int    `form:"pageSize,default=20"`
+	level      string `form:"level,optional"`
+	status     string `form:"status,optional"`
+	alertType  string `form:"type,optional"`
+	objectType string `form:"objectType,optional"`
+	from       string `form:"from,optional"`
+	to         string `form:"to,optional"`
+	q          string `form:"q,optional"`
+	sort       string `form:"sort,optional"`
+}
+
+type AlertListData {
+	items    []Alert `json:"items"`
+	total    int     `json:"total"`
+	page     int     `json:"page"`
+	pageSize int     `json:"pageSize"`
+}
+
+type AlertListResp {
+	code      string        `json:"code"`
+	message   string        `json:"message"`
+	data      AlertListData `json:"data"`
+	requestId string        `json:"requestId"`
+}
+
+type AlertDetailReq {
+	id string `path:"id"`
+}
+
+type AlertDetailData {
+	alert               Alert                   `json:"alert"`
+	metrics             interface{}             `json:"metrics,optional"`
+	notificationHistory []AlertNotificationInfo `json:"notificationHistory"`
+}
+
+type AlertDetailResp {
+	code      string          `json:"code"`
+	message   string          `json:"message"`
+	data      AlertDetailData `json:"data"`
+	requestId string          `json:"requestId"`
+}
+
+// ---- API-11 流量 ----
+type TrafficRow {
+	objectType    string `json:"objectType"`
+	objectId      string `json:"objectId"`
+	objectName    string `json:"objectName"`
+	upBytes       int64  `json:"upBytes"`
+	downBytes     int64  `json:"downBytes"`
+	totalBytes    int64  `json:"totalBytes"`
+	connections   int    `json:"connections"`
+	lastUpdatedAt string `json:"lastUpdatedAt"`
+}
+
+type TrafficListReq {
+	groupBy  string `form:"groupBy,default=portGroup"`
+	from     string `form:"from,optional"`
+	to       string `form:"to,optional"`
+	page     int    `form:"page,default=1"`
+	pageSize int    `form:"pageSize,default=20"`
+	sort     string `form:"sort,optional"`
+}
+
+type TrafficListData {
+	items    []TrafficRow `json:"items"`
+	total    int          `json:"total"`
+	page     int          `json:"page"`
+	pageSize int          `json:"pageSize"`
+	unit     string       `json:"unit"`
+}
+
+type TrafficListResp {
+	code      string          `json:"code"`
+	message   string          `json:"message"`
+	data      TrafficListData `json:"data"`
+	requestId string          `json:"requestId"`
+}
+
+// ---- API-12 客户端 ----
+type ClientRow {
+	clientId       string `json:"clientId"`
+	email          string `json:"email"`
+	portId         string `json:"portId"`
+	portGroupId    string `json:"portGroupId"`
+	upBytes        int64  `json:"upBytes"`
+	downBytes      int64  `json:"downBytes"`
+	lastOnlineAt   string `json:"lastOnlineAt"`
+	lastSubFetchAt string `json:"lastSubFetchAt"`
+}
+
+type ClientListReq {
+	portGroupId string `form:"portGroupId,optional"`
+	portId      string `form:"portId,optional"`
+	q           string `form:"q,optional"`
+	page        int    `form:"page,default=1"`
+	pageSize    int    `form:"pageSize,default=20"`
+}
+
+type ClientListData {
+	items    []ClientRow `json:"items"`
+	total    int         `json:"total"`
+	page     int         `json:"page"`
+	pageSize int         `json:"pageSize"`
+}
+
+type ClientListResp {
+	code      string         `json:"code"`
+	message   string         `json:"message"`
+	data      ClientListData `json:"data"`
+	requestId string         `json:"requestId"`
+}
+
+// ---- API-13 隧道链路 ----
+type TunnelLink {
+	tunnelGroupId   string  `json:"tunnelGroupId"`
+	tunnelGroupName string  `json:"tunnelGroupName"`
+	nodeId          string  `json:"nodeId"`
+	nodeName        string  `json:"nodeName"`
+	latencyMs       float64 `json:"latencyMs"`
+	lossRate        float64 `json:"lossRate"`
+	jitterMs        float64 `json:"jitterMs"`
+	score           float64 `json:"score"`
+	status          string  `json:"status"`
+	lastProbeAt     string  `json:"lastProbeAt"`
+}
+
+type TunnelPathEvent {
+	ts          string `json:"ts"`
+	portGroupId string `json:"portGroupId"`
+	fromNodeId  string `json:"fromNodeId"`
+	toNodeId    string `json:"toNodeId"`
+	reason      string `json:"reason"`
+}
+
+type TunnelSeries {
+	latency []TimePoint `json:"latency"`
+	loss    []TimePoint `json:"loss"`
+}
+
+type TunnelListReq {
+	timeRange     string `form:"range,default=24h"`
+	tunnelGroupId string `form:"tunnelGroupId,optional"`
+	status        string `form:"status,optional"`
+}
+
+type TunnelListData {
+	links      []TunnelLink      `json:"links"`
+	series     TunnelSeries      `json:"series"`
+	pathEvents []TunnelPathEvent `json:"pathEvents"`
+}
+
+type TunnelListResp {
+	code      string         `json:"code"`
+	message   string         `json:"message"`
+	data      TunnelListData `json:"data"`
+	requestId string         `json:"requestId"`
+}
+
+// ---- API-14 / API-15 常规与安全设置（只读）----
+type GeneralSettingsData {
+	listen                    string `json:"listen"`
+	publicUrl                 string `json:"publicUrl"`
+	path                      string `json:"path"`
+	sessionIdleTtlSeconds     int    `json:"sessionIdleTtlSeconds"`
+	sessionAbsoluteTtlSeconds int    `json:"sessionAbsoluteTtlSeconds"`
+	defaultLocale             string `json:"defaultLocale"`
+	defaultTheme              string `json:"defaultTheme"`
+	pageSize                  int    `json:"pageSize"`
+	deploymentMode            string `json:"deploymentMode"`
+	instances                 int    `json:"instances"`
+}
+
+type GeneralSettingsResp {
+	code      string              `json:"code"`
+	message   string              `json:"message"`
+	data      GeneralSettingsData `json:"data"`
+	requestId string              `json:"requestId"`
+}
+
+type RateLimitSpec {
+	windowSeconds int `json:"windowSeconds"`
+	maxAttempts   int `json:"maxAttempts"`
+}
+
+type SecuritySettingsData {
+	sessionIdleTtlSeconds     int           `json:"sessionIdleTtlSeconds"`
+	sessionAbsoluteTtlSeconds int           `json:"sessionAbsoluteTtlSeconds"`
+	loginRateLimit            RateLimitSpec `json:"loginRateLimit"`
+	passwordRateLimit         RateLimitSpec `json:"passwordRateLimit"`
+	allowedOrigins            []string      `json:"allowedOrigins"`
+	cookieSecure              bool          `json:"cookieSecure"`
+	trustedProxyCidrs         []string      `json:"trustedProxyCidrs"`
+	certFingerprintPinning    bool          `json:"certFingerprintPinning"`
+}
+
+type SecuritySettingsResp {
+	code      string               `json:"code"`
+	message   string               `json:"message"`
+	data      SecuritySettingsData `json:"data"`
+	requestId string               `json:"requestId"`
+}
+
+// ---- API-16 显示名 ----
+type ProfileUpdateReq {
+	displayName string `json:"displayName"`
+}
+
+type ProfileData {
+	id          string `json:"id"`
+	account     string `json:"account"`
+	displayName string `json:"displayName"`
+}
+
+type ProfileResp {
+	code      string      `json:"code"`
+	message   string      `json:"message"`
+	data      ProfileData `json:"data"`
+	requestId string      `json:"requestId"`
+}
+
+// ---- API-17 / API-18 活跃会话 ----
+type SessionRow {
+	id                string `json:"id"`
+	current           bool   `json:"current"`
+	userAgent         string `json:"userAgent"`
+	ip                string `json:"ip"`
+	createdAt         string `json:"createdAt"`
+	lastActiveAt      string `json:"lastActiveAt"`
+	idleExpiresAt     string `json:"idleExpiresAt"`
+	absoluteExpiresAt string `json:"absoluteExpiresAt"`
+}
+
+type SessionListData {
+	items []SessionRow `json:"items"`
+}
+
+type SessionListResp {
+	code      string          `json:"code"`
+	message   string          `json:"message"`
+	data      SessionListData `json:"data"`
+	requestId string          `json:"requestId"`
+}
+
+type SessionRevokeReq {
+	id string `path:"id"`
+}
+
+type SessionRevokeResp {
+	code      string      `json:"code"`
+	message   string      `json:"message"`
+	data      interface{} `json:"data"`
+	requestId string      `json:"requestId"`
+}
+
+// ---- API-19 / API-20 / API-21 探测规格 ----
+type ProbeSettingsData {
+	frequencySeconds  int    `json:"frequencySeconds"`
+	timeoutMs         int    `json:"timeoutMs"`
+	failureThreshold  int    `json:"failureThreshold"`
+	recoveryThreshold int    `json:"recoveryThreshold"`
+	updatedAt         string `json:"updatedAt"`
+}
+
+type ProbeSettingsResp {
+	code      string            `json:"code"`
+	message   string            `json:"message"`
+	data      ProbeSettingsData `json:"data"`
+	requestId string            `json:"requestId"`
+}
+
+type ProbeSettingsUpdateReq {
+	frequencySeconds  int `json:"frequencySeconds"`
+	timeoutMs         int `json:"timeoutMs"`
+	failureThreshold  int `json:"failureThreshold"`
+	recoveryThreshold int `json:"recoveryThreshold"`
+}
+
+type ProbeApplyNode {
+	nodeId    string `json:"nodeId"`
+	nodeName  string `json:"nodeName"`
+	state     string `json:"state"`
+	version   int64  `json:"version"`
+	elapsedMs int64  `json:"elapsedMs"`
+	errorCode string `json:"errorCode,optional"`
+}
+
+type ProbeApplyStatusData {
+	taskId    string           `json:"taskId"`
+	state     string           `json:"state"`
+	updatedAt string           `json:"updatedAt"`
+	nodes     []ProbeApplyNode `json:"nodes"`
+}
+
+type ProbeApplyStatusResp {
+	code      string               `json:"code"`
+	message   string               `json:"message"`
+	data      ProbeApplyStatusData `json:"data"`
+	requestId string               `json:"requestId"`
+}
+
+// ---- API-22 ~ API-25 订阅域名映射 ----
+type SubscriptionHost {
+	id             int64  `json:"id"`
+	host           string `json:"host"`
+	entryGroupId   string `json:"entryGroupId"`
+	entryGroupName string `json:"entryGroupName"`
+	tlsStatus      string `json:"tlsStatus"`
+	certNotAfter   string `json:"certNotAfter"`
+	createdAt      string `json:"createdAt"`
+}
+
+type SubscriptionHostListReq {
+	page     int `form:"page,default=1"`
+	pageSize int `form:"pageSize,default=20"`
+}
+
+type SubscriptionHostListData {
+	items    []SubscriptionHost `json:"items"`
+	total    int                `json:"total"`
+	page     int                `json:"page"`
+	pageSize int                `json:"pageSize"`
+}
+
+type SubscriptionHostListResp {
+	code      string                   `json:"code"`
+	message   string                   `json:"message"`
+	data      SubscriptionHostListData `json:"data"`
+	requestId string                   `json:"requestId"`
+}
+
+type SubscriptionHostCreateReq {
+	host         string `json:"host"`
+	entryGroupId string `json:"entryGroupId"`
+	tlsMode      string `json:"tlsMode"`
+}
+
+type SubscriptionHostUpdateReq {
+	id           string  `path:"id"`
+	entryGroupId *string `json:"entryGroupId,optional"`
+	tlsMode      *string `json:"tlsMode,optional"`
+}
+
+type SubscriptionHostItemData {
+	item SubscriptionHost `json:"item"`
+}
+
+type SubscriptionHostItemResp {
+	code      string                   `json:"code"`
+	message   string                   `json:"message"`
+	data      SubscriptionHostItemData `json:"data"`
+	requestId string                   `json:"requestId"`
+}
+
+type SubscriptionHostDeleteResp {
+	code      string      `json:"code"`
+	message   string      `json:"message"`
+	data      interface{} `json:"data"`
+	requestId string      `json:"requestId"`
+}
+
+// ---- API-26 / API-27 订阅格式 ----
+type SubscriptionFormat {
+	key                 string `json:"key"`
+	label               string `json:"label"`
+	enabled             bool   `json:"enabled"`
+	sortOrder           int    `json:"sortOrder"`
+	source              string `json:"source"`
+	capabilitySupported bool   `json:"capabilitySupported"`
+}
+
+type SubscriptionFormatsData {
+	formats []SubscriptionFormat `json:"formats"`
+}
+
+type SubscriptionFormatsResp {
+	code      string                  `json:"code"`
+	message   string                  `json:"message"`
+	data      SubscriptionFormatsData `json:"data"`
+	requestId string                  `json:"requestId"`
+}
+
+type SubscriptionFormatUpdate {
+	key       string `json:"key"`
+	enabled   bool   `json:"enabled"`
+	sortOrder int    `json:"sortOrder"`
+}
+
+type SubscriptionFormatsUpdateReq {
+	formats []SubscriptionFormatUpdate `json:"formats"`
+}
+
+// ---- API-28 订阅预览 ----
+type SubscriptionPreviewReq {
+	entryGroupId string `form:"entryGroupId"`
+	format       string `form:"format"`
+}
+
+type SubscriptionPreviewData {
+	url       string `json:"url"`
+	format    string `json:"format"`
+	expiresAt string `json:"expiresAt,optional"`
+}
+
+type SubscriptionPreviewResp {
+	code      string                  `json:"code"`
+	message   string                  `json:"message"`
+	data      SubscriptionPreviewData `json:"data"`
+	requestId string                  `json:"requestId"`
+}
+
+// ---- API-29 ~ API-33 通知渠道 ----
+type NotificationChannel {
+	id           int64  `json:"id"`
+	name         string `json:"name"`
+	channelType  string `json:"type"`
+	targetMasked string `json:"targetMasked"`
+	minLevel     string `json:"minLevel"`
+	enabled      bool   `json:"enabled"`
+	lastSentAt   string `json:"lastSentAt,optional"`
+}
+
+type NotificationListData {
+	items []NotificationChannel `json:"items"`
+}
+
+type NotificationListResp {
+	code      string               `json:"code"`
+	message   string               `json:"message"`
+	data      NotificationListData `json:"data"`
+	requestId string               `json:"requestId"`
+}
+
+type NotificationCreateReq {
+	name        string `json:"name"`
+	channelType string `json:"type"`
+	target      string `json:"target"`
+	minLevel    string `json:"minLevel"`
+	enabled     bool   `json:"enabled"`
+}
+
+type NotificationUpdateReq {
+	id       string  `path:"id"`
+	name     *string `json:"name,optional"`
+	target   *string `json:"target,optional"`
+	minLevel *string `json:"minLevel,optional"`
+	enabled  *bool   `json:"enabled,optional"`
+}
+
+type NotificationItemData {
+	item NotificationChannel `json:"item"`
+}
+
+type NotificationItemResp {
+	code      string               `json:"code"`
+	message   string               `json:"message"`
+	data      NotificationItemData `json:"data"`
+	requestId string               `json:"requestId"`
+}
+
+type NotificationDeleteResp {
+	code      string      `json:"code"`
+	message   string      `json:"message"`
+	data      interface{} `json:"data"`
+	requestId string      `json:"requestId"`
+}
+
+type NotificationTestReq {
+	id string `path:"id"`
+}
+
+type NotificationTestData {
+	success   bool   `json:"success"`
+	errorCode string `json:"errorCode,optional"`
+}
+
+type NotificationTestResp {
+	code      string               `json:"code"`
+	message   string               `json:"message"`
+	data      NotificationTestData `json:"data"`
+	requestId string               `json:"requestId"`
+}
+
+// ---- API-34 / API-35 保留与存储 ----
+type RetentionSettingsData {
+	rawDays              int    `json:"rawDays"`
+	minuteDays           int    `json:"minuteDays"`
+	hourDays             int    `json:"hourDays"`
+	snapshotPerNode      int    `json:"snapshotPerNode"`
+	snapshotPerPortGroup int    `json:"snapshotPerPortGroup"`
+	snapshotDays         int    `json:"snapshotDays"`
+	cleanupAtUtc         string `json:"cleanupAtUtc"`
+	auditDays            int    `json:"auditDays"`
+}
+
+type RetentionSettingsResp {
+	code      string                `json:"code"`
+	message   string                `json:"message"`
+	data      RetentionSettingsData `json:"data"`
+	requestId string                `json:"requestId"`
+}
+
+type RetentionStorageData {
+	databaseSizeBytes         int64   `json:"databaseSizeBytes"`
+	trafficPartitionSizeBytes int64   `json:"trafficPartitionSizeBytes"`
+	earliestRecordAt          *string `json:"earliestRecordAt"`
+	latestRecordAt            *string `json:"latestRecordAt"`
+	collectedAt               string  `json:"collectedAt"`
+}
+
+type RetentionStorageResp {
+	code      string               `json:"code"`
+	message   string               `json:"message"`
+	data      RetentionStorageData `json:"data"`
+	requestId string               `json:"requestId"`
+}
+
+// ---- API-36 ~ API-41 Geo 文件 ----
+type GeoFile {
+	id              int64  `json:"id"`
+	kind            string `json:"kind"`
+	name            string `json:"name"`
+	version         string `json:"version"`
+	sizeBytes       int64  `json:"sizeBytes"`
+	categoriesCount int    `json:"categoriesCount"`
+	checksum        string `json:"checksum"`
+	updatedAt       string `json:"updatedAt"`
+	status          string `json:"status"`
+}
+
+type GeoFileListReq {
+	kind     string `form:"kind,optional"`
+	page     int    `form:"page,default=1"`
+	pageSize int    `form:"pageSize,default=20"`
+}
+
+type GeoFileListData {
+	items    []GeoFile `json:"items"`
+	total    int       `json:"total"`
+	page     int       `json:"page"`
+	pageSize int       `json:"pageSize"`
+}
+
+type GeoFileListResp {
+	code      string          `json:"code"`
+	message   string          `json:"message"`
+	data      GeoFileListData `json:"data"`
+	requestId string          `json:"requestId"`
+}
+
+type GeoFileReq {
+	id string `path:"id"`
+}
+
+type GeoFileUpdateData {
+	state     string `json:"state"`
+	version   string `json:"version"`
+	errorCode string `json:"errorCode,optional"`
+}
+
+type GeoFileUpdateResp {
+	code      string            `json:"code"`
+	message   string            `json:"message"`
+	data      GeoFileUpdateData `json:"data"`
+	requestId string            `json:"requestId"`
+}
+
+// 上传接口使用 multipart/form-data（file + source + checksum），
+// goctl 不支持文件字段，body 由 handler 手工解析（design.md §3.2 例外）。
+type GeoUploadResp {
+	code      string  `json:"code"`
+	message   string  `json:"message"`
+	data      GeoFile `json:"data"`
+	requestId string  `json:"requestId"`
+}
+
+type GeoCategory {
+	category     string `json:"category"`
+	entriesCount int    `json:"entriesCount"`
+}
+
+type GeoCategoryListReq {
+	id       string `path:"id"`
+	page     int    `form:"page,default=1"`
+	pageSize int    `form:"pageSize,default=50"`
+}
+
+type GeoCategoryListData {
+	items    []GeoCategory `json:"items"`
+	total    int           `json:"total"`
+	page     int           `json:"page"`
+	pageSize int           `json:"pageSize"`
+}
+
+type GeoCategoryListResp {
+	code      string              `json:"code"`
+	message   string              `json:"message"`
+	data      GeoCategoryListData `json:"data"`
+	requestId string              `json:"requestId"`
+}
+
+type GeoEntry {
+	value    string `json:"value"`
+	category string `json:"category"`
+}
+
+type GeoEntryListReq {
+	id       string `path:"id"`
+	category string `form:"category,optional"`
+	page     int    `form:"page,default=1"`
+	pageSize int    `form:"pageSize,default=50"`
+}
+
+type GeoEntryListData {
+	items    []GeoEntry `json:"items"`
+	total    int        `json:"total"`
+	page     int        `json:"page"`
+	pageSize int        `json:"pageSize"`
+}
+
+type GeoEntryListResp {
+	code      string           `json:"code"`
+	message   string           `json:"message"`
+	data      GeoEntryListData `json:"data"`
+	requestId string           `json:"requestId"`
+}
+
+type GeoValidateData {
+	valid           bool   `json:"valid"`
+	categoriesCount int    `json:"categoriesCount"`
+	entriesCount    int    `json:"entriesCount"`
+	error           string `json:"error,optional"`
+}
+
+type GeoValidateResp {
+	code      string          `json:"code"`
+	message   string          `json:"message"`
+	data      GeoValidateData `json:"data"`
+	requestId string          `json:"requestId"`
+}
+
+// ---- API-42 / API-43 审计 ----
+type AuditLog {
+	id         int64  `json:"id"`
+	ts         string `json:"ts"`
+	actor      string `json:"actor"`
+	action     string `json:"action"`
+	objectType string `json:"objectType"`
+	objectId   string `json:"objectId"`
+	result     string `json:"result"`
+	requestId  string `json:"requestId"`
+	ip         string `json:"ip"`
+}
+
+type AuditLogListReq {
+	from       string `form:"from,optional"`
+	to         string `form:"to,optional"`
+	actor      string `form:"actor,optional"`
+	action     string `form:"action,optional"`
+	objectType string `form:"objectType,optional"`
+	objectId   string `form:"objectId,optional"`
+	requestId  string `form:"requestId,optional"`
+	page       int    `form:"page,default=1"`
+	pageSize   int    `form:"pageSize,default=20"`
+}
+
+type AuditLogListData {
+	items    []AuditLog `json:"items"`
+	total    int        `json:"total"`
+	page     int        `json:"page"`
+	pageSize int        `json:"pageSize"`
+}
+
+type AuditLogListResp {
+	code      string           `json:"code"`
+	message   string           `json:"message"`
+	data      AuditLogListData `json:"data"`
+	requestId string           `json:"requestId"`
+}
+
+type AuditLogDetailReq {
+	id string `path:"id"`
+}
+
+type AuditLogDetailData {
+	item AuditLog `json:"item"`
+}
+
+type AuditLogDetailResp {
+	code      string             `json:"code"`
+	message   string             `json:"message"`
+	data      AuditLogDetailData `json:"data"`
+	requestId string             `json:"requestId"`
+}
+
+// ---- API-44 / API-45 系统信息与健康 ----
+type SystemPanel {
+	version       string `json:"version"`
+	commit        string `json:"commit"`
+	buildTime     string `json:"buildTime"`
+	uptimeSeconds int64  `json:"uptimeSeconds"`
+}
+
+type SystemComponents {
+	coreControl string `json:"coreControl"`
+	coreNodeMin string `json:"coreNodeMin"`
+	coreNodeMax string `json:"coreNodeMax"`
+	agentMin    string `json:"agentMin"`
+	agentMax    string `json:"agentMax"`
+	contract    string `json:"contract"`
+	schema      string `json:"schema"`
+	xray        string `json:"xray"`
+}
+
+type SystemInfoData {
+	panel         SystemPanel       `json:"panel"`
+	components    SystemComponents  `json:"components"`
+	compatibility CompatibilityInfo `json:"compatibility"`
+}
+
+type SystemInfoResp {
+	code      string         `json:"code"`
+	message   string         `json:"message"`
+	data      SystemInfoData `json:"data"`
+	requestId string         `json:"requestId"`
+}
+
+type HealthItem {
+	key    string `json:"key"`
+	status string `json:"status"`
+	detail string `json:"detail"`
+}
+
+type SystemHealthData {
+	items     []HealthItem `json:"items"`
+	checkedAt string       `json:"checkedAt"`
+}
+
+type SystemHealthResp {
+	code      string           `json:"code"`
+	message   string           `json:"message"`
+	data      SystemHealthData `json:"data"`
+	requestId string           `json:"requestId"`
+}
+
+// ---- API-46 ~ API-53 在线升级 ----
+type UpgradePanelInfo {
+	currentVersion  string `json:"currentVersion"`
+	latestVersion   string `json:"latestVersion"`
+	updateAvailable bool   `json:"updateAvailable"`
+	channel         string `json:"channel"`
+	composeMode     bool   `json:"composeMode"`
+}
+
+type UpgradeLockInfo {
+	holder    string `json:"holder"`
+	scope     string `json:"scope"`
+	expiresAt string `json:"expiresAt"`
+}
+
+type UpgradeTaskNode {
+	nodeId       string `json:"nodeId"`
+	nodeName     string `json:"nodeName"`
+	fromVersion  string `json:"fromVersion"`
+	toVersion    string `json:"toVersion"`
+	state        string `json:"state"`
+	errorCode    string `json:"errorCode,optional"`
+	errorMessage string `json:"errorMessage,optional"`
+	updatedAt    string `json:"updatedAt"`
+}
+
+type UpgradeTask {
+	id            string            `json:"id"`
+	scope         string            `json:"scope"`
+	targetVersion string            `json:"targetVersion"`
+	fromVersion   string            `json:"fromVersion"`
+	batchId       string            `json:"batchId,optional"`
+	status        string            `json:"status"`
+	errorCode     string            `json:"errorCode,optional"`
+	errorMessage  string            `json:"errorMessage,optional"`
+	createdBy     string            `json:"createdBy"`
+	requestId     string            `json:"requestId"`
+	createdAt     string            `json:"createdAt"`
+	startedAt     string            `json:"startedAt,optional"`
+	finishedAt    string            `json:"finishedAt,optional"`
+	nodes         []UpgradeTaskNode `json:"nodes,optional"`
+}
+
+type UpgradeStatusData {
+	panel         UpgradePanelInfo  `json:"panel"`
+	compatibility CompatibilityInfo `json:"compatibility"`
+	lock          *UpgradeLockInfo  `json:"lock,optional"`
+	activeTask    *UpgradeTask      `json:"activeTask,optional"`
+}
+
+type UpgradeStatusResp {
+	code      string            `json:"code"`
+	message   string            `json:"message"`
+	data      UpgradeStatusData `json:"data"`
+	requestId string            `json:"requestId"`
+}
+
+type UpgradeCheckData {
+	checkedAt       string `json:"checkedAt"`
+	latestVersion   string `json:"latestVersion"`
+	updateAvailable bool   `json:"updateAvailable"`
+	errorCode       string `json:"errorCode,optional"`
+}
+
+type UpgradeCheckResp {
+	code      string           `json:"code"`
+	message   string           `json:"message"`
+	data      UpgradeCheckData `json:"data"`
+	requestId string           `json:"requestId"`
+}
+
+type UpgradePanelReq {
+	operationId   string `json:"operationId"`
+	targetVersion string `json:"targetVersion"`
+}
+
+type UpgradeAgentReq {
+	operationId   string   `json:"operationId"`
+	targetVersion string   `json:"targetVersion"`
+	nodeIds       []string `json:"nodeIds,optional"`
+	groupId       string   `json:"groupId,optional"`
+	groupType     string   `json:"groupType,optional"`
+}
+
+type UpgradeTaskData {
+	item UpgradeTask `json:"item"`
+}
+
+type UpgradeTaskResp {
+	code      string          `json:"code"`
+	message   string          `json:"message"`
+	data      UpgradeTaskData `json:"data"`
+	requestId string          `json:"requestId"`
+}
+
+type UpgradeTaskListReq {
+	page     int    `form:"page,default=1"`
+	pageSize int    `form:"pageSize,default=20"`
+	scope    string `form:"scope,optional"`
+	status   string `form:"status,optional"`
+}
+
+type UpgradeTaskListData {
+	items    []UpgradeTask `json:"items"`
+	total    int           `json:"total"`
+	page     int           `json:"page"`
+	pageSize int           `json:"pageSize"`
+}
+
+type UpgradeTaskListResp {
+	code      string              `json:"code"`
+	message   string              `json:"message"`
+	data      UpgradeTaskListData `json:"data"`
+	requestId string              `json:"requestId"`
+}
+
+type UpgradeTaskDetailReq {
+	id string `path:"id"`
+}
+
+type UpgradeTaskDetailData {
+	item UpgradeTask `json:"item"`
+}
+
+type UpgradeTaskDetailResp {
+	code      string                `json:"code"`
+	message   string                `json:"message"`
+	data      UpgradeTaskDetailData `json:"data"`
+	requestId string                `json:"requestId"`
+}
+
+type UpgradeTaskRetryReq {
+	id string `path:"id"`
+}
+
+type UpgradePendingItem {
+	nodeId        string `json:"nodeId"`
+	nodeName      string `json:"nodeName"`
+	targetVersion string `json:"targetVersion"`
+	batchId       string `json:"batchId"`
+	createdAt     string `json:"createdAt"`
+	expiresAt     string `json:"expiresAt"`
+}
+
+type UpgradePendingData {
+	items []UpgradePendingItem `json:"items"`
+}
+
+type UpgradePendingResp {
+	code      string             `json:"code"`
+	message   string             `json:"message"`
+	data      UpgradePendingData `json:"data"`
+	requestId string             `json:"requestId"`
+}
+
+// ---- API-54 WebSocket ----
+type WsReq {
+	resources     string `form:"resources,optional"`
+	schemaVersion int    `form:"schemaVersion,default=1"`
+}
+
+// ---- 路由 ----
+@server (
+	prefix:     /api/v1
+	group:      dashboard
+	middleware: Auth
+)
+service panel-api {
+	@doc "控制台指标卡与横幅"
+	@handler DashboardSummary
+	get /dashboard/summary returns (DashboardSummaryResp)
+
+	@doc "控制台流量趋势"
+	@handler DashboardTraffic
+	get /dashboard/traffic (DashboardTrafficReq) returns (DashboardTrafficResp)
+}
+
+@server (
+	prefix:     /api/v1
+	group:      monitoring
+	middleware: Auth
+)
+service panel-api {
+	@doc "监控总览"
+	@handler MonitoringOverview
+	get /monitoring/overview (MonitoringOverviewReq) returns (MonitoringOverviewResp)
+
+	@doc "隧道链路"
+	@handler MonitoringTunnels
+	get /monitoring/tunnels (TunnelListReq) returns (TunnelListResp)
+}
+
+@server (
+	prefix:     /api/v1
+	group:      nodes
+	middleware: Auth
+)
+service panel-api {
+	@doc "节点列表"
+	@handler NodeList
+	get /nodes (NodeListReq) returns (NodeListResp)
+
+	@doc "节点详情头部"
+	@handler NodeDetail
+	get /nodes/:id (NodeDetailReq) returns (NodeDetailResp)
+
+	@doc "节点资源与内核序列"
+	@handler NodeMetrics
+	get /nodes/:id/metrics (NodeMetricsReq) returns (NodeMetricsResp)
+
+	@doc "节点事件（30 天）"
+	@handler NodeEvents
+	get /nodes/:id/events (NodeEventsReq) returns (NodeEventsResp)
+}
+
+@server (
+	prefix:     /api/v1
+	group:      nodes
+	middleware: OriginCheck,Auth
+)
+service panel-api {
+	@doc "立即拨测"
+	@handler NodeProbe
+	post /nodes/:id/probe (NodeProbeReq) returns (NodeProbeResp)
+}
+
+@server (
+	prefix:     /api/v1
+	group:      alerts
+	middleware: Auth
+)
+service panel-api {
+	@doc "告警列表"
+	@handler AlertList
+	get /alerts (AlertListReq) returns (AlertListResp)
+
+	@doc "告警详情"
+	@handler AlertDetail
+	get /alerts/:id (AlertDetailReq) returns (AlertDetailResp)
+}
+
+@server (
+	prefix:     /api/v1
+	group:      traffic
+	middleware: Auth
+)
+service panel-api {
+	@doc "流量分组表"
+	@handler TrafficList
+	get /traffic (TrafficListReq) returns (TrafficListResp)
+}
+
+@server (
+	prefix:     /api/v1
+	group:      clients
+	middleware: Auth
+)
+service panel-api {
+	@doc "客户端统计"
+	@handler ClientList
+	get /clients (ClientListReq) returns (ClientListResp)
+}
+
+@server (
+	prefix:     /api/v1/settings
+	group:      settings
+	middleware: Auth
+)
+service panel-api {
+	@doc "常规设置（只读）"
+	@handler GeneralSettings
+	get /general returns (GeneralSettingsResp)
+
+	@doc "安全策略（只读）"
+	@handler SecuritySettings
+	get /security returns (SecuritySettingsResp)
+
+	@doc "探测规格"
+	@handler ProbeSettings
+	get /probe returns (ProbeSettingsResp)
+
+	@doc "探测规格下发进度"
+	@handler ProbeApplyStatus
+	get /probe/apply-status returns (ProbeApplyStatusResp)
+
+	@doc "订阅域名映射列表"
+	@handler SubscriptionHostList
+	get /subscription-hosts (SubscriptionHostListReq) returns (SubscriptionHostListResp)
+
+	@doc "订阅格式开关"
+	@handler SubscriptionFormats
+	get /subscription/formats returns (SubscriptionFormatsResp)
+
+	@doc "订阅 URL 预览"
+	@handler SubscriptionPreview
+	get /subscription/preview (SubscriptionPreviewReq) returns (SubscriptionPreviewResp)
+
+	@doc "通知渠道列表"
+	@handler NotificationList
+	get /notifications returns (NotificationListResp)
+
+	@doc "保留策略（只读）"
+	@handler RetentionSettings
+	get /retention returns (RetentionSettingsResp)
+
+	@doc "存储用量"
+	@handler RetentionStorage
+	get /retention/storage returns (RetentionStorageResp)
+
+	@doc "Geo 文件列表"
+	@handler GeoFileList
+	get /geo-files (GeoFileListReq) returns (GeoFileListResp)
+
+	@doc "Geo 分类浏览"
+	@handler GeoCategoryList
+	get /geo-files/:id/categories (GeoCategoryListReq) returns (GeoCategoryListResp)
+
+	@doc "Geo 条目查询"
+	@handler GeoEntryList
+	get /geo-files/:id/entries (GeoEntryListReq) returns (GeoEntryListResp)
+}
+
+@server (
+	prefix:     /api/v1/settings
+	group:      settings
+	middleware: OriginCheck,Auth
+)
+service panel-api {
+	@doc "更新显示名"
+	@handler ProfileUpdate
+	patch /profile (ProfileUpdateReq) returns (ProfileResp)
+
+	@doc "保存探测规格并触发下发"
+	@handler ProbeSettingsUpdate
+	put /probe (ProbeSettingsUpdateReq) returns (ProbeSettingsResp)
+
+	@doc "新增订阅域名"
+	@handler SubscriptionHostCreate
+	post /subscription-hosts (SubscriptionHostCreateReq) returns (SubscriptionHostItemResp)
+
+	@doc "编辑订阅域名"
+	@handler SubscriptionHostUpdate
+	patch /subscription-hosts/:id (SubscriptionHostUpdateReq) returns (SubscriptionHostItemResp)
+
+	@doc "删除订阅域名（幂等）"
+	@handler SubscriptionHostDelete
+	delete /subscription-hosts/:id (GeoFileReq) returns (SubscriptionHostDeleteResp)
+
+	@doc "保存订阅格式开关"
+	@handler SubscriptionFormatsUpdate
+	put /subscription/formats (SubscriptionFormatsUpdateReq) returns (SubscriptionFormatsResp)
+
+	@doc "新增通知渠道"
+	@handler NotificationCreate
+	post /notifications (NotificationCreateReq) returns (NotificationItemResp)
+
+	@doc "编辑通知渠道"
+	@handler NotificationUpdate
+	patch /notifications/:id (NotificationUpdateReq) returns (NotificationItemResp)
+
+	@doc "删除通知渠道"
+	@handler NotificationDelete
+	delete /notifications/:id (NotificationTestReq) returns (NotificationDeleteResp)
+
+	@doc "发送测试通知"
+	@handler NotificationTest
+	post /notifications/:id/test (NotificationTestReq) returns (NotificationTestResp)
+
+	@doc "检查并更新 Geo 文件"
+	@handler GeoFileUpdate
+	post /geo-files/:id/update (GeoFileReq) returns (GeoFileUpdateResp)
+
+	@doc "上传自定义 Geo 文件（multipart/form-data）"
+	@handler GeoFileUpload
+	post /geo-files/upload returns (GeoUploadResp)
+
+	@doc "校验 Geo 文件"
+	@handler GeoFileValidate
+	post /geo-files/:id/validate (GeoFileReq) returns (GeoValidateResp)
+}
+
+@server (
+	prefix:     /api/v1/auth
+	group:      auth
+	middleware: Auth
+)
+service panel-api {
+	@doc "活跃会话"
+	@handler SessionList
+	get /sessions returns (SessionListResp)
+}
+
+@server (
+	prefix:     /api/v1/auth
+	group:      auth
+	middleware: OriginCheck,Auth
+)
+service panel-api {
+	@doc "吊销其他会话"
+	@handler SessionRevoke
+	delete /sessions/:id (SessionRevokeReq) returns (SessionRevokeResp)
+}
+
+@server (
+	prefix:     /api/v1
+	group:      audit
+	middleware: Auth
+)
+service panel-api {
+	@doc "审计列表"
+	@handler AuditLogList
+	get /audit-logs (AuditLogListReq) returns (AuditLogListResp)
+
+	@doc "审计详情"
+	@handler AuditLogDetail
+	get /audit-logs/:id (AuditLogDetailReq) returns (AuditLogDetailResp)
+}
+
+@server (
+	prefix:     /api/v1
+	group:      system
+	middleware: Auth
+)
+service panel-api {
+	@doc "版本与兼容信息"
+	@handler SystemInfo
+	get /system/info returns (SystemInfoResp)
+
+	@doc "健康检查"
+	@handler SystemHealth
+	get /system/health returns (SystemHealthResp)
+}
+
+@server (
+	prefix:     /api/v1
+	group:      upgrade
+	middleware: Auth
+)
+service panel-api {
+	@doc "升级状态与锁"
+	@handler UpgradeStatus
+	get /upgrade/status returns (UpgradeStatusResp)
+
+	@doc "升级历史"
+	@handler UpgradeTaskList
+	get /upgrade/tasks (UpgradeTaskListReq) returns (UpgradeTaskListResp)
+
+	@doc "任务详情"
+	@handler UpgradeTaskDetail
+	get /upgrade/tasks/:id (UpgradeTaskDetailReq) returns (UpgradeTaskDetailResp)
+
+	@doc "待升级清单"
+	@handler UpgradePending
+	get /upgrade/pending returns (UpgradePendingResp)
+}
+
+@server (
+	prefix:     /api/v1
+	group:      upgrade
+	middleware: OriginCheck,Auth
+)
+service panel-api {
+	@doc "手动检查更新"
+	@handler UpgradeCheck
+	post /upgrade/check returns (UpgradeCheckResp)
+
+	@doc "发起 Panel 升级"
+	@handler UpgradePanel
+	post /upgrade/panel (UpgradePanelReq) returns (UpgradeTaskResp)
+
+	@doc "发起 Agent 单节点或批次升级"
+	@handler UpgradeAgents
+	post /upgrade/agents (UpgradeAgentReq) returns (UpgradeTaskResp)
+
+	@doc "手动重试失败任务"
+	@handler UpgradeTaskRetry
+	post /upgrade/tasks/:id/retry (UpgradeTaskRetryReq) returns (UpgradeTaskResp)
+}
+
+@server (
+	prefix:     /api/v1
+	group:      ws
+	middleware: Auth
+)
+service panel-api {
+	@doc "WebSocket 实时通道"
+	@handler Ws
+	get /ws (WsReq)
+}
+

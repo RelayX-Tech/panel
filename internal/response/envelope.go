@@ -199,3 +199,27 @@ func NewPasswordSameAsOld() *AppError {
 func Internal(err error) *AppError {
 	return &AppError{Status: errcode.HTTPStatus[errcode.INTERNAL], Code: errcode.INTERNAL, Message: "internal error", Err: err}
 }
+
+// NewError 按错误码注册表构造 AppError；未知错误码按 500 INTERNAL 处理。
+func NewError(code, message string) *AppError {
+	status := errcode.HTTPStatus[code]
+	if status == 0 {
+		status = 500
+	}
+	return &AppError{Status: status, Code: code, Message: message}
+}
+
+// NewFieldError 构造字段级错误：错误码 + field + details。
+func NewFieldError(code, field, message string) *AppError {
+	status := errcode.HTTPStatus[code]
+	if status == 0 {
+		status = 400
+	}
+	return &AppError{
+		Status:  status,
+		Code:    code,
+		Message: message,
+		Field:   field,
+		Details: []FieldError{{Field: field, Code: code, Message: message}},
+	}
+}

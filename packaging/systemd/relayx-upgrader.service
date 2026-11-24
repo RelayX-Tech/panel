@@ -1,0 +1,32 @@
+[Unit]
+Description=RelayX Panel Upgrader
+Documentation=https://github.com/pig0224/agile-docs
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+Group=relayx
+ExecStart=/opt/relayx/current/relayx-upgrader \
+  -socket /run/relayx/upgrader.sock \
+  -token-file /etc/relayx/upgrader.token \
+  -state-file /var/lib/relayx-upgrader/state.json \
+  -base-dir /opt/relayx \
+  -services relayx-panel.service,relayx-core-control.service
+Restart=on-failure
+RestartSec=5s
+EnvironmentFile=-/etc/relayx/upgrader.env
+
+# 硬化（design.md §7.3）：只允许写升级目录与状态目录，仅能重启 Panel 与 core-control。
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+NoNewPrivileges=true
+ReadWritePaths=/opt/relayx /var/lib/relayx-upgrader /run/relayx
+RuntimeDirectory=relayx
+RuntimeDirectoryMode=0770
+UMask=0027
+
+[Install]
+WantedBy=multi-user.target

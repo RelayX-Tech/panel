@@ -95,6 +95,15 @@ func main() {
 
 	svcCtx := svc.NewServiceContext(c, conn, c.Cache)
 
+	// WS Hub：单实例直连；配置 Redis 时启用多实例扇出订阅。
+	if svcCtx.WSHub != nil {
+		go svcCtx.WSHub.Run(context.Background())
+	}
+
+	// 升级对账：启动回填 Panel 任务终态，并按分钟收敛锁与任务（design.md §5.5）。
+	startUpgradeReconciler(svcCtx)
+	startUpgradeChecker(svcCtx)
+
 	// 节点注册 gRPC 服务（design §3.10）；启用且已配置 Panel CA 时启动。
 	if c.Registration.Enabled && svcCtx.Register != nil {
 		regSrv, err := registration.NewGRPCServer(c.Registration, svcCtx.Register)
@@ -240,6 +249,66 @@ func openDatabase(c config.Config) (*sql.DB, error) {
 		return nil, err
 	}
 	return db, nil
+}
+
+// startUpgradeReconciler 启动时立即对账一次，此后每分钟收敛（锁过期 / 任务终态回填）。
+func startUpgradeReconciler(svcCtx *svc.ServiceContext) {
+	if svcCtx.Upgrade == nil {
+		return
+	}
+	stop := make(chan struct{})
+	var once sync.Once
+	shutdown := func() { once.Do(func() { close(stop) }) }
+	go func() {
+		ctx := context.Background()
+		if err := svcCtx.Upgrade.Reconcile(ctx); err != nil {
+			logx.Errorw("upgrade.reconcile", logx.Field("error", err.Error()))
+		}
+		ticker := time.NewTicker(time.Minute)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ticker.C:
+				if err := svcCtx.Upgrade.Reconcile(ctx); err != nil {
+					logx.Errorw("upgrade.reconcile", logx.Field("error", err.Error()))
+				}
+			case <-stop:
+				return
+			}
+		}
+	}()
+	proc.AddShutdownListener(shutdown)
+}
+
+// startUpgradeChecker 启动后异步检查一次更新，此后每 6 小时检查（AC98）。
+func startUpgradeChecker(svcCtx *svc.ServiceContext) {
+	if svcCtx.Upgrade == nil {
+		return
+	}
+	stop := make(chan struct{})
+	var once sync.Once
+	shutdown := func() { once.Do(func() { close(stop) }) }
+	go func() {
+		check := func() {
+			ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+			defer cancel()
+			if _, err := svcCtx.Upgrade.Check(ctx); err != nil {
+				logx.Errorw("upgrade.check", logx.Field("error", err.Error()))
+			}
+		}
+		check()
+		ticker := time.NewTicker(6 * time.Hour)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ticker.C:
+				check()
+			case <-stop:
+				return
+			}
+		}
+	}()
+	proc.AddShutdownListener(shutdown)
 }
 
 // startSessionCleanup 每小时清理超过保留期的过期会话；进程优雅停机时停止。

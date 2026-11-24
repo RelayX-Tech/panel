@@ -15,6 +15,594 @@
   },
   "basePath": "/",
   "paths": {
+    "/api/v1/alerts": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "告警列表",
+        "operationId": "alertsAlertList",
+        "parameters": [
+          {
+            "type": "integer",
+            "default": 1,
+            "example": 1,
+            "name": "page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 20,
+            "example": 20,
+            "name": "pageSize",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "level",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "name": "status",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "name": "type",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "name": "objectType",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "name": "from",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "name": "to",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "name": "q",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "name": "sort",
+            "in": "query",
+            "allowEmptyValue": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "items",
+                    "total",
+                    "page",
+                    "pageSize"
+                  ],
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "id",
+                          "level",
+                          "type",
+                          "objectType",
+                          "objectId",
+                          "objectName",
+                          "message",
+                          "status",
+                          "firstSeenAt",
+                          "lastSeenAt"
+                        ],
+                        "properties": {
+                          "firstSeenAt": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "integer"
+                          },
+                          "lastSeenAt": {
+                            "type": "string"
+                          },
+                          "level": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          },
+                          "notification": {
+                            "type": "object",
+                            "required": [
+                              "status",
+                              "channel",
+                              "errorCode",
+                              "sentAt"
+                            ],
+                            "properties": {
+                              "channel": {
+                                "type": "string"
+                              },
+                              "errorCode": {
+                                "type": "string"
+                              },
+                              "sentAt": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "objectId": {
+                            "type": "string"
+                          },
+                          "objectName": {
+                            "type": "string"
+                          },
+                          "objectType": {
+                            "type": "string"
+                          },
+                          "resolvedAt": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "pageSize": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/alerts/{id}": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "告警详情",
+        "operationId": "alertsAlertDetail",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "alert",
+                    "notificationHistory"
+                  ],
+                  "properties": {
+                    "alert": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "level",
+                        "type",
+                        "objectType",
+                        "objectId",
+                        "objectName",
+                        "message",
+                        "status",
+                        "firstSeenAt",
+                        "lastSeenAt"
+                      ],
+                      "properties": {
+                        "firstSeenAt": {
+                          "type": "string"
+                        },
+                        "id": {
+                          "type": "integer"
+                        },
+                        "lastSeenAt": {
+                          "type": "string"
+                        },
+                        "level": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "notification": {
+                          "type": "object",
+                          "required": [
+                            "status",
+                            "channel",
+                            "errorCode",
+                            "sentAt"
+                          ],
+                          "properties": {
+                            "channel": {
+                              "type": "string"
+                            },
+                            "errorCode": {
+                              "type": "string"
+                            },
+                            "sentAt": {
+                              "type": "string"
+                            },
+                            "status": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "objectId": {
+                          "type": "string"
+                        },
+                        "objectName": {
+                          "type": "string"
+                        },
+                        "objectType": {
+                          "type": "string"
+                        },
+                        "resolvedAt": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "metrics": {},
+                    "notificationHistory": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "status",
+                          "channel",
+                          "errorCode",
+                          "sentAt"
+                        ],
+                        "properties": {
+                          "channel": {
+                            "type": "string"
+                          },
+                          "errorCode": {
+                            "type": "string"
+                          },
+                          "sentAt": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/audit-logs": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "审计列表",
+        "operationId": "auditAuditLogList",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "from",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "name": "to",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "name": "actor",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "name": "action",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "name": "objectType",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "name": "objectId",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "name": "requestId",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "default": 1,
+            "example": 1,
+            "name": "page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 20,
+            "example": 20,
+            "name": "pageSize",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "items",
+                    "total",
+                    "page",
+                    "pageSize"
+                  ],
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "id",
+                          "ts",
+                          "actor",
+                          "action",
+                          "objectType",
+                          "objectId",
+                          "result",
+                          "requestId",
+                          "ip"
+                        ],
+                        "properties": {
+                          "action": {
+                            "type": "string"
+                          },
+                          "actor": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "integer"
+                          },
+                          "ip": {
+                            "type": "string"
+                          },
+                          "objectId": {
+                            "type": "string"
+                          },
+                          "objectType": {
+                            "type": "string"
+                          },
+                          "requestId": {
+                            "type": "string"
+                          },
+                          "result": {
+                            "type": "string"
+                          },
+                          "ts": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "pageSize": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/audit-logs/{id}": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "审计详情",
+        "operationId": "auditAuditLogDetail",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "item"
+                  ],
+                  "properties": {
+                    "item": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "ts",
+                        "actor",
+                        "action",
+                        "objectType",
+                        "objectId",
+                        "result",
+                        "requestId",
+                        "ip"
+                      ],
+                      "properties": {
+                        "action": {
+                          "type": "string"
+                        },
+                        "actor": {
+                          "type": "string"
+                        },
+                        "id": {
+                          "type": "integer"
+                        },
+                        "ip": {
+                          "type": "string"
+                        },
+                        "objectId": {
+                          "type": "string"
+                        },
+                        "objectType": {
+                          "type": "string"
+                        },
+                        "requestId": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "type": "string"
+                        },
+                        "ts": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/auth/login": {
       "post": {
         "consumes": [
@@ -273,6 +861,5350 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/sessions": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "活跃会话",
+        "operationId": "authSessionList",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "items"
+                  ],
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "id",
+                          "current",
+                          "userAgent",
+                          "ip",
+                          "createdAt",
+                          "lastActiveAt",
+                          "idleExpiresAt",
+                          "absoluteExpiresAt"
+                        ],
+                        "properties": {
+                          "absoluteExpiresAt": {
+                            "type": "string"
+                          },
+                          "createdAt": {
+                            "type": "string"
+                          },
+                          "current": {
+                            "type": "boolean"
+                          },
+                          "id": {
+                            "type": "string"
+                          },
+                          "idleExpiresAt": {
+                            "type": "string"
+                          },
+                          "ip": {
+                            "type": "string"
+                          },
+                          "lastActiveAt": {
+                            "type": "string"
+                          },
+                          "userAgent": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/sessions/{id}": {
+      "delete": {
+        "consumes": [
+          "application/x-www-form-urlencoded"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "吊销其他会话",
+        "operationId": "authSessionRevoke",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {},
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/clients": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "客户端统计",
+        "operationId": "clientsClientList",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "portGroupId",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "name": "portId",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "name": "q",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "default": 1,
+            "example": 1,
+            "name": "page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 20,
+            "example": 20,
+            "name": "pageSize",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "items",
+                    "total",
+                    "page",
+                    "pageSize"
+                  ],
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "clientId",
+                          "email",
+                          "portId",
+                          "portGroupId",
+                          "upBytes",
+                          "downBytes",
+                          "lastOnlineAt",
+                          "lastSubFetchAt"
+                        ],
+                        "properties": {
+                          "clientId": {
+                            "type": "string"
+                          },
+                          "downBytes": {
+                            "type": "integer"
+                          },
+                          "email": {
+                            "type": "string"
+                          },
+                          "lastOnlineAt": {
+                            "type": "string"
+                          },
+                          "lastSubFetchAt": {
+                            "type": "string"
+                          },
+                          "portGroupId": {
+                            "type": "string"
+                          },
+                          "portId": {
+                            "type": "string"
+                          },
+                          "upBytes": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "pageSize": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/dashboard/summary": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "控制台指标卡与横幅",
+        "operationId": "dashboardDashboardSummary",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "nodes",
+                    "portGroups",
+                    "alerts",
+                    "clientsOnline",
+                    "throughput",
+                    "updatedAt"
+                  ],
+                  "properties": {
+                    "alerts": {
+                      "type": "object",
+                      "required": [
+                        "active",
+                        "byLevel"
+                      ],
+                      "properties": {
+                        "active": {
+                          "type": "integer"
+                        },
+                        "byLevel": {
+                          "type": "object",
+                          "required": [
+                            "info",
+                            "warning",
+                            "critical"
+                          ],
+                          "properties": {
+                            "critical": {
+                              "type": "integer"
+                            },
+                            "info": {
+                              "type": "integer"
+                            },
+                            "warning": {
+                              "type": "integer"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "clientsOnline": {
+                      "type": "integer"
+                    },
+                    "nodes": {
+                      "type": "object",
+                      "required": [
+                        "entry",
+                        "tunnel"
+                      ],
+                      "properties": {
+                        "entry": {
+                          "type": "object",
+                          "required": [
+                            "online",
+                            "total"
+                          ],
+                          "properties": {
+                            "online": {
+                              "type": "integer"
+                            },
+                            "total": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "tunnel": {
+                          "type": "object",
+                          "required": [
+                            "online",
+                            "total"
+                          ],
+                          "properties": {
+                            "online": {
+                              "type": "integer"
+                            },
+                            "total": {
+                              "type": "integer"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "portGroups": {
+                      "type": "object",
+                      "required": [
+                        "byStatus"
+                      ],
+                      "properties": {
+                        "byStatus": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "status",
+                              "count"
+                            ],
+                            "properties": {
+                              "count": {
+                                "type": "integer"
+                              },
+                              "status": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "throughput": {
+                      "type": "object",
+                      "required": [
+                        "inBps",
+                        "outBps"
+                      ],
+                      "properties": {
+                        "inBps": {
+                          "type": "number"
+                        },
+                        "outBps": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "updatedAt": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/dashboard/traffic": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "控制台流量趋势",
+        "operationId": "dashboardDashboardTraffic",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "24h",
+            "example": "24h",
+            "name": "range",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "range",
+                    "unit",
+                    "series"
+                  ],
+                  "properties": {
+                    "range": {
+                      "type": "string"
+                    },
+                    "series": {
+                      "type": "object",
+                      "required": [
+                        "up",
+                        "down"
+                      ],
+                      "properties": {
+                        "down": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "ts",
+                              "value"
+                            ],
+                            "properties": {
+                              "ts": {
+                                "type": "string"
+                              },
+                              "value": {
+                                "type": "number"
+                              }
+                            }
+                          }
+                        },
+                        "up": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "ts",
+                              "value"
+                            ],
+                            "properties": {
+                              "ts": {
+                                "type": "string"
+                              },
+                              "value": {
+                                "type": "number"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "unit": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/monitoring/overview": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "监控总览",
+        "operationId": "monitoringMonitoringOverview",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "24h",
+            "example": "24h",
+            "name": "range",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "cards",
+                    "traffic",
+                    "alertTrend",
+                    "nodeHealth",
+                    "topPortGroups",
+                    "recentAlerts"
+                  ],
+                  "properties": {
+                    "alertTrend": {
+                      "type": "object",
+                      "required": [
+                        "info",
+                        "warning",
+                        "critical"
+                      ],
+                      "properties": {
+                        "critical": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "ts",
+                              "value"
+                            ],
+                            "properties": {
+                              "ts": {
+                                "type": "string"
+                              },
+                              "value": {
+                                "type": "number"
+                              }
+                            }
+                          }
+                        },
+                        "info": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "ts",
+                              "value"
+                            ],
+                            "properties": {
+                              "ts": {
+                                "type": "string"
+                              },
+                              "value": {
+                                "type": "number"
+                              }
+                            }
+                          }
+                        },
+                        "warning": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "ts",
+                              "value"
+                            ],
+                            "properties": {
+                              "ts": {
+                                "type": "string"
+                              },
+                              "value": {
+                                "type": "number"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "cards": {
+                      "type": "object",
+                      "required": [
+                        "activeAlerts",
+                        "onlineNodes",
+                        "onlineClients",
+                        "inBps",
+                        "outBps",
+                        "xrayAbnormal"
+                      ],
+                      "properties": {
+                        "activeAlerts": {
+                          "type": "integer"
+                        },
+                        "inBps": {
+                          "type": "number"
+                        },
+                        "onlineClients": {
+                          "type": "integer"
+                        },
+                        "onlineNodes": {
+                          "type": "integer"
+                        },
+                        "outBps": {
+                          "type": "number"
+                        },
+                        "xrayAbnormal": {
+                          "type": "integer"
+                        }
+                      }
+                    },
+                    "nodeHealth": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "groupType",
+                          "groupId",
+                          "groupName",
+                          "nodes"
+                        ],
+                        "properties": {
+                          "groupId": {
+                            "type": "string"
+                          },
+                          "groupName": {
+                            "type": "string"
+                          },
+                          "groupType": {
+                            "type": "string"
+                          },
+                          "nodes": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "required": [
+                                "nodeId",
+                                "nodeName",
+                                "status",
+                                "cpuPercent",
+                                "memPercent"
+                              ],
+                              "properties": {
+                                "cpuPercent": {
+                                  "type": "number"
+                                },
+                                "memPercent": {
+                                  "type": "number"
+                                },
+                                "nodeId": {
+                                  "type": "string"
+                                },
+                                "nodeName": {
+                                  "type": "string"
+                                },
+                                "status": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "recentAlerts": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "id",
+                          "level",
+                          "type",
+                          "objectName",
+                          "message",
+                          "lastSeenAt"
+                        ],
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "lastSeenAt": {
+                            "type": "string"
+                          },
+                          "level": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          },
+                          "objectName": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "topPortGroups": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "portGroupId",
+                          "portGroupName",
+                          "totalBytes",
+                          "connections"
+                        ],
+                        "properties": {
+                          "connections": {
+                            "type": "integer"
+                          },
+                          "portGroupId": {
+                            "type": "string"
+                          },
+                          "portGroupName": {
+                            "type": "string"
+                          },
+                          "totalBytes": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    },
+                    "traffic": {
+                      "type": "object",
+                      "required": [
+                        "up",
+                        "down"
+                      ],
+                      "properties": {
+                        "down": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "ts",
+                              "value"
+                            ],
+                            "properties": {
+                              "ts": {
+                                "type": "string"
+                              },
+                              "value": {
+                                "type": "number"
+                              }
+                            }
+                          }
+                        },
+                        "up": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "ts",
+                              "value"
+                            ],
+                            "properties": {
+                              "ts": {
+                                "type": "string"
+                              },
+                              "value": {
+                                "type": "number"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/monitoring/tunnels": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "隧道链路",
+        "operationId": "monitoringMonitoringTunnels",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "24h",
+            "example": "24h",
+            "name": "range",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "tunnelGroupId",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "name": "status",
+            "in": "query",
+            "allowEmptyValue": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "links",
+                    "series",
+                    "pathEvents"
+                  ],
+                  "properties": {
+                    "links": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "tunnelGroupId",
+                          "tunnelGroupName",
+                          "nodeId",
+                          "nodeName",
+                          "latencyMs",
+                          "lossRate",
+                          "jitterMs",
+                          "score",
+                          "status",
+                          "lastProbeAt"
+                        ],
+                        "properties": {
+                          "jitterMs": {
+                            "type": "number"
+                          },
+                          "lastProbeAt": {
+                            "type": "string"
+                          },
+                          "latencyMs": {
+                            "type": "number"
+                          },
+                          "lossRate": {
+                            "type": "number"
+                          },
+                          "nodeId": {
+                            "type": "string"
+                          },
+                          "nodeName": {
+                            "type": "string"
+                          },
+                          "score": {
+                            "type": "number"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "tunnelGroupId": {
+                            "type": "string"
+                          },
+                          "tunnelGroupName": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "pathEvents": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "ts",
+                          "portGroupId",
+                          "fromNodeId",
+                          "toNodeId",
+                          "reason"
+                        ],
+                        "properties": {
+                          "fromNodeId": {
+                            "type": "string"
+                          },
+                          "portGroupId": {
+                            "type": "string"
+                          },
+                          "reason": {
+                            "type": "string"
+                          },
+                          "toNodeId": {
+                            "type": "string"
+                          },
+                          "ts": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "series": {
+                      "type": "object",
+                      "required": [
+                        "latency",
+                        "loss"
+                      ],
+                      "properties": {
+                        "latency": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "ts",
+                              "value"
+                            ],
+                            "properties": {
+                              "ts": {
+                                "type": "string"
+                              },
+                              "value": {
+                                "type": "number"
+                              }
+                            }
+                          }
+                        },
+                        "loss": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "ts",
+                              "value"
+                            ],
+                            "properties": {
+                              "ts": {
+                                "type": "string"
+                              },
+                              "value": {
+                                "type": "number"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/nodes": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "节点列表",
+        "operationId": "nodesNodeList",
+        "parameters": [
+          {
+            "type": "integer",
+            "default": 1,
+            "example": 1,
+            "name": "page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 20,
+            "example": 20,
+            "name": "pageSize",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "type",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "name": "status",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "name": "groupId",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "name": "region",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "name": "q",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "name": "sort",
+            "in": "query",
+            "allowEmptyValue": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "items",
+                    "total",
+                    "page",
+                    "pageSize"
+                  ],
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "id",
+                          "name",
+                          "type",
+                          "groupId",
+                          "groupName",
+                          "region",
+                          "ip",
+                          "status",
+                          "cpuPercent",
+                          "memPercent",
+                          "diskPercent",
+                          "load1",
+                          "tcpConnections",
+                          "netInBps",
+                          "netOutBps",
+                          "xrayState",
+                          "restarts",
+                          "lastSeenAt"
+                        ],
+                        "properties": {
+                          "cpuPercent": {
+                            "type": "number"
+                          },
+                          "diskPercent": {
+                            "type": "number"
+                          },
+                          "displayState": {
+                            "type": "string"
+                          },
+                          "groupId": {
+                            "type": "string"
+                          },
+                          "groupName": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "string"
+                          },
+                          "ip": {
+                            "type": "string"
+                          },
+                          "lastSeenAt": {
+                            "type": "string"
+                          },
+                          "load1": {
+                            "type": "number"
+                          },
+                          "memPercent": {
+                            "type": "number"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "netInBps": {
+                            "type": "number"
+                          },
+                          "netOutBps": {
+                            "type": "number"
+                          },
+                          "region": {
+                            "type": "string"
+                          },
+                          "restarts": {
+                            "type": "integer"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "tcpConnections": {
+                            "type": "integer"
+                          },
+                          "type": {
+                            "type": "string"
+                          },
+                          "xrayState": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "pageSize": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/nodes/{id}": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "节点详情头部",
+        "operationId": "nodesNodeDetail",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "name",
+                    "type",
+                    "groupId",
+                    "groupName",
+                    "region",
+                    "ip",
+                    "status",
+                    "cpuPercent",
+                    "memPercent",
+                    "diskPercent",
+                    "load1",
+                    "tcpConnections",
+                    "netInBps",
+                    "netOutBps",
+                    "xrayState",
+                    "restarts",
+                    "lastSeenAt",
+                    "agentVersion",
+                    "xrayVersion",
+                    "certificateNotAfter",
+                    "nics",
+                    "xray",
+                    "probe"
+                  ],
+                  "properties": {
+                    "agentVersion": {
+                      "type": "string"
+                    },
+                    "certificateNotAfter": {
+                      "type": "string"
+                    },
+                    "cpuPercent": {
+                      "type": "number"
+                    },
+                    "diskPercent": {
+                      "type": "number"
+                    },
+                    "displayState": {
+                      "type": "string"
+                    },
+                    "groupId": {
+                      "type": "string"
+                    },
+                    "groupName": {
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "ip": {
+                      "type": "string"
+                    },
+                    "lastSeenAt": {
+                      "type": "string"
+                    },
+                    "load1": {
+                      "type": "number"
+                    },
+                    "memPercent": {
+                      "type": "number"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "netInBps": {
+                      "type": "number"
+                    },
+                    "netOutBps": {
+                      "type": "number"
+                    },
+                    "nics": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "name",
+                          "mac",
+                          "mtu",
+                          "up",
+                          "addresses"
+                        ],
+                        "properties": {
+                          "addresses": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "mac": {
+                            "type": "string"
+                          },
+                          "mtu": {
+                            "type": "integer"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "up": {
+                            "type": "boolean"
+                          }
+                        }
+                      }
+                    },
+                    "probe": {
+                      "type": "object",
+                      "required": [
+                        "type",
+                        "latencyMs",
+                        "success",
+                        "failures",
+                        "consecutiveFailures",
+                        "checkedAt"
+                      ],
+                      "properties": {
+                        "checkedAt": {
+                          "type": "string"
+                        },
+                        "consecutiveFailures": {
+                          "type": "integer"
+                        },
+                        "failures": {
+                          "type": "integer"
+                        },
+                        "latencyMs": {
+                          "type": "integer"
+                        },
+                        "success": {
+                          "type": "boolean"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "region": {
+                      "type": "string"
+                    },
+                    "restarts": {
+                      "type": "integer"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "tcpConnections": {
+                      "type": "integer"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "xray": {
+                      "type": "object",
+                      "required": [
+                        "pid",
+                        "cpuPercent",
+                        "memBytes",
+                        "restarts",
+                        "inbounds",
+                        "outbounds"
+                      ],
+                      "properties": {
+                        "cpuPercent": {
+                          "type": "number"
+                        },
+                        "inbounds": {
+                          "type": "integer"
+                        },
+                        "memBytes": {
+                          "type": "integer"
+                        },
+                        "outbounds": {
+                          "type": "integer"
+                        },
+                        "pid": {
+                          "type": "integer"
+                        },
+                        "restarts": {
+                          "type": "integer"
+                        }
+                      }
+                    },
+                    "xrayState": {
+                      "type": "string"
+                    },
+                    "xrayVersion": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/nodes/{id}/events": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "节点事件（30 天）",
+        "operationId": "nodesNodeEvents",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 1,
+            "example": 1,
+            "name": "page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 20,
+            "example": 20,
+            "name": "pageSize",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "type",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "name": "from",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "name": "to",
+            "in": "query",
+            "allowEmptyValue": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "items",
+                    "total",
+                    "page",
+                    "pageSize"
+                  ],
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "id",
+                          "nodeId",
+                          "type",
+                          "level",
+                          "message",
+                          "metadata",
+                          "occurredAt"
+                        ],
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "level": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          },
+                          "metadata": {},
+                          "nodeId": {
+                            "type": "string"
+                          },
+                          "occurredAt": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "pageSize": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/nodes/{id}/metrics": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "节点资源与内核序列",
+        "operationId": "nodesNodeMetrics",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "default": "24h",
+            "example": "24h",
+            "name": "range",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "metrics",
+            "in": "query",
+            "allowEmptyValue": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "series"
+                  ],
+                  "properties": {
+                    "series": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "metric",
+                          "unit",
+                          "points"
+                        ],
+                        "properties": {
+                          "metric": {
+                            "type": "string"
+                          },
+                          "points": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "required": [
+                                "ts",
+                                "value"
+                              ],
+                              "properties": {
+                                "ts": {
+                                  "type": "string"
+                                },
+                                "value": {
+                                  "type": "number"
+                                }
+                              }
+                            }
+                          },
+                          "unit": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/nodes/{id}/probe": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "立即拨测",
+        "operationId": "nodesNodeProbe",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "type",
+                "target"
+              ],
+              "properties": {
+                "expectedStatus": {
+                  "type": "integer"
+                },
+                "target": {
+                  "type": "string"
+                },
+                "timeoutMs": {
+                  "type": "integer"
+                },
+                "type": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "latencyMs"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "latencyMs": {
+                      "type": "integer"
+                    },
+                    "statusCode": {
+                      "type": "integer"
+                    },
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/settings/general": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "常规设置（只读）",
+        "operationId": "settingsGeneralSettings",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "listen",
+                    "publicUrl",
+                    "path",
+                    "sessionIdleTtlSeconds",
+                    "sessionAbsoluteTtlSeconds",
+                    "defaultLocale",
+                    "defaultTheme",
+                    "pageSize",
+                    "deploymentMode",
+                    "instances"
+                  ],
+                  "properties": {
+                    "defaultLocale": {
+                      "type": "string"
+                    },
+                    "defaultTheme": {
+                      "type": "string"
+                    },
+                    "deploymentMode": {
+                      "type": "string"
+                    },
+                    "instances": {
+                      "type": "integer"
+                    },
+                    "listen": {
+                      "type": "string"
+                    },
+                    "pageSize": {
+                      "type": "integer"
+                    },
+                    "path": {
+                      "type": "string"
+                    },
+                    "publicUrl": {
+                      "type": "string"
+                    },
+                    "sessionAbsoluteTtlSeconds": {
+                      "type": "integer"
+                    },
+                    "sessionIdleTtlSeconds": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/settings/geo-files": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "Geo 文件列表",
+        "operationId": "settingsGeoFileList",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "kind",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "default": 1,
+            "example": 1,
+            "name": "page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 20,
+            "example": 20,
+            "name": "pageSize",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "items",
+                    "total",
+                    "page",
+                    "pageSize"
+                  ],
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "id",
+                          "kind",
+                          "name",
+                          "version",
+                          "sizeBytes",
+                          "categoriesCount",
+                          "checksum",
+                          "updatedAt",
+                          "status"
+                        ],
+                        "properties": {
+                          "categoriesCount": {
+                            "type": "integer"
+                          },
+                          "checksum": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "integer"
+                          },
+                          "kind": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "sizeBytes": {
+                            "type": "integer"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "updatedAt": {
+                            "type": "string"
+                          },
+                          "version": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "pageSize": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/settings/geo-files/upload": {
+      "post": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "上传自定义 Geo 文件（multipart/form-data）",
+        "operationId": "settingsGeoFileUpload",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "kind",
+                    "name",
+                    "version",
+                    "sizeBytes",
+                    "categoriesCount",
+                    "checksum",
+                    "updatedAt",
+                    "status"
+                  ],
+                  "properties": {
+                    "categoriesCount": {
+                      "type": "integer"
+                    },
+                    "checksum": {
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "integer"
+                    },
+                    "kind": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "sizeBytes": {
+                      "type": "integer"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "updatedAt": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/settings/geo-files/{id}/categories": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "Geo 分类浏览",
+        "operationId": "settingsGeoCategoryList",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 1,
+            "example": 1,
+            "name": "page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 50,
+            "example": 50,
+            "name": "pageSize",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "items",
+                    "total",
+                    "page",
+                    "pageSize"
+                  ],
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "category",
+                          "entriesCount"
+                        ],
+                        "properties": {
+                          "category": {
+                            "type": "string"
+                          },
+                          "entriesCount": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "pageSize": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/settings/geo-files/{id}/entries": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "Geo 条目查询",
+        "operationId": "settingsGeoEntryList",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "category",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "default": 1,
+            "example": 1,
+            "name": "page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 50,
+            "example": 50,
+            "name": "pageSize",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "items",
+                    "total",
+                    "page",
+                    "pageSize"
+                  ],
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "value",
+                          "category"
+                        ],
+                        "properties": {
+                          "category": {
+                            "type": "string"
+                          },
+                          "value": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "pageSize": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/settings/geo-files/{id}/update": {
+      "post": {
+        "consumes": [
+          "application/x-www-form-urlencoded"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "检查并更新 Geo 文件",
+        "operationId": "settingsGeoFileUpdate",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "state",
+                    "version"
+                  ],
+                  "properties": {
+                    "errorCode": {
+                      "type": "string"
+                    },
+                    "state": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/settings/geo-files/{id}/validate": {
+      "post": {
+        "consumes": [
+          "application/x-www-form-urlencoded"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "校验 Geo 文件",
+        "operationId": "settingsGeoFileValidate",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "valid",
+                    "categoriesCount",
+                    "entriesCount"
+                  ],
+                  "properties": {
+                    "categoriesCount": {
+                      "type": "integer"
+                    },
+                    "entriesCount": {
+                      "type": "integer"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "valid": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/settings/notifications": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "通知渠道列表",
+        "operationId": "settingsNotificationList",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "items"
+                  ],
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "id",
+                          "name",
+                          "type",
+                          "targetMasked",
+                          "minLevel",
+                          "enabled"
+                        ],
+                        "properties": {
+                          "enabled": {
+                            "type": "boolean"
+                          },
+                          "id": {
+                            "type": "integer"
+                          },
+                          "lastSentAt": {
+                            "type": "string"
+                          },
+                          "minLevel": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "targetMasked": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "新增通知渠道",
+        "operationId": "settingsNotificationCreate",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "name",
+                "type",
+                "target",
+                "minLevel",
+                "enabled"
+              ],
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "minLevel": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "target": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "item"
+                  ],
+                  "properties": {
+                    "item": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "name",
+                        "type",
+                        "targetMasked",
+                        "minLevel",
+                        "enabled"
+                      ],
+                      "properties": {
+                        "enabled": {
+                          "type": "boolean"
+                        },
+                        "id": {
+                          "type": "integer"
+                        },
+                        "lastSentAt": {
+                          "type": "string"
+                        },
+                        "minLevel": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "targetMasked": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/settings/notifications/{id}": {
+      "delete": {
+        "consumes": [
+          "application/x-www-form-urlencoded"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "删除通知渠道",
+        "operationId": "settingsNotificationDelete",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {},
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "编辑通知渠道",
+        "operationId": "settingsNotificationUpdate",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "minLevel": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "target": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "item"
+                  ],
+                  "properties": {
+                    "item": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "name",
+                        "type",
+                        "targetMasked",
+                        "minLevel",
+                        "enabled"
+                      ],
+                      "properties": {
+                        "enabled": {
+                          "type": "boolean"
+                        },
+                        "id": {
+                          "type": "integer"
+                        },
+                        "lastSentAt": {
+                          "type": "string"
+                        },
+                        "minLevel": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "targetMasked": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/settings/notifications/{id}/test": {
+      "post": {
+        "consumes": [
+          "application/x-www-form-urlencoded"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "发送测试通知",
+        "operationId": "settingsNotificationTest",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "success"
+                  ],
+                  "properties": {
+                    "errorCode": {
+                      "type": "string"
+                    },
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/settings/probe": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "探测规格",
+        "operationId": "settingsProbeSettings",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "frequencySeconds",
+                    "timeoutMs",
+                    "failureThreshold",
+                    "recoveryThreshold",
+                    "updatedAt"
+                  ],
+                  "properties": {
+                    "failureThreshold": {
+                      "type": "integer"
+                    },
+                    "frequencySeconds": {
+                      "type": "integer"
+                    },
+                    "recoveryThreshold": {
+                      "type": "integer"
+                    },
+                    "timeoutMs": {
+                      "type": "integer"
+                    },
+                    "updatedAt": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "保存探测规格并触发下发",
+        "operationId": "settingsProbeSettingsUpdate",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "frequencySeconds",
+                "timeoutMs",
+                "failureThreshold",
+                "recoveryThreshold"
+              ],
+              "properties": {
+                "failureThreshold": {
+                  "type": "integer"
+                },
+                "frequencySeconds": {
+                  "type": "integer"
+                },
+                "recoveryThreshold": {
+                  "type": "integer"
+                },
+                "timeoutMs": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "frequencySeconds",
+                    "timeoutMs",
+                    "failureThreshold",
+                    "recoveryThreshold",
+                    "updatedAt"
+                  ],
+                  "properties": {
+                    "failureThreshold": {
+                      "type": "integer"
+                    },
+                    "frequencySeconds": {
+                      "type": "integer"
+                    },
+                    "recoveryThreshold": {
+                      "type": "integer"
+                    },
+                    "timeoutMs": {
+                      "type": "integer"
+                    },
+                    "updatedAt": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/settings/probe/apply-status": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "探测规格下发进度",
+        "operationId": "settingsProbeApplyStatus",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "taskId",
+                    "state",
+                    "updatedAt",
+                    "nodes"
+                  ],
+                  "properties": {
+                    "nodes": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "nodeId",
+                          "nodeName",
+                          "state",
+                          "version",
+                          "elapsedMs"
+                        ],
+                        "properties": {
+                          "elapsedMs": {
+                            "type": "integer"
+                          },
+                          "errorCode": {
+                            "type": "string"
+                          },
+                          "nodeId": {
+                            "type": "string"
+                          },
+                          "nodeName": {
+                            "type": "string"
+                          },
+                          "state": {
+                            "type": "string"
+                          },
+                          "version": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    },
+                    "state": {
+                      "type": "string"
+                    },
+                    "taskId": {
+                      "type": "string"
+                    },
+                    "updatedAt": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/settings/profile": {
+      "patch": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "更新显示名",
+        "operationId": "settingsProfileUpdate",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "displayName"
+              ],
+              "properties": {
+                "displayName": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "account",
+                    "displayName"
+                  ],
+                  "properties": {
+                    "account": {
+                      "type": "string"
+                    },
+                    "displayName": {
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/settings/retention": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "保留策略（只读）",
+        "operationId": "settingsRetentionSettings",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "rawDays",
+                    "minuteDays",
+                    "hourDays",
+                    "snapshotPerNode",
+                    "snapshotPerPortGroup",
+                    "snapshotDays",
+                    "cleanupAtUtc",
+                    "auditDays"
+                  ],
+                  "properties": {
+                    "auditDays": {
+                      "type": "integer"
+                    },
+                    "cleanupAtUtc": {
+                      "type": "string"
+                    },
+                    "hourDays": {
+                      "type": "integer"
+                    },
+                    "minuteDays": {
+                      "type": "integer"
+                    },
+                    "rawDays": {
+                      "type": "integer"
+                    },
+                    "snapshotDays": {
+                      "type": "integer"
+                    },
+                    "snapshotPerNode": {
+                      "type": "integer"
+                    },
+                    "snapshotPerPortGroup": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/settings/retention/storage": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "存储用量",
+        "operationId": "settingsRetentionStorage",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "databaseSizeBytes",
+                    "trafficPartitionSizeBytes",
+                    "earliestRecordAt",
+                    "latestRecordAt",
+                    "collectedAt"
+                  ],
+                  "properties": {
+                    "collectedAt": {
+                      "type": "string"
+                    },
+                    "databaseSizeBytes": {
+                      "type": "integer"
+                    },
+                    "earliestRecordAt": {
+                      "type": "string"
+                    },
+                    "latestRecordAt": {
+                      "type": "string"
+                    },
+                    "trafficPartitionSizeBytes": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/settings/security": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "安全策略（只读）",
+        "operationId": "settingsSecuritySettings",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "sessionIdleTtlSeconds",
+                    "sessionAbsoluteTtlSeconds",
+                    "loginRateLimit",
+                    "passwordRateLimit",
+                    "allowedOrigins",
+                    "cookieSecure",
+                    "trustedProxyCidrs",
+                    "certFingerprintPinning"
+                  ],
+                  "properties": {
+                    "allowedOrigins": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "certFingerprintPinning": {
+                      "type": "boolean"
+                    },
+                    "cookieSecure": {
+                      "type": "boolean"
+                    },
+                    "loginRateLimit": {
+                      "type": "object",
+                      "required": [
+                        "windowSeconds",
+                        "maxAttempts"
+                      ],
+                      "properties": {
+                        "maxAttempts": {
+                          "type": "integer"
+                        },
+                        "windowSeconds": {
+                          "type": "integer"
+                        }
+                      }
+                    },
+                    "passwordRateLimit": {
+                      "type": "object",
+                      "required": [
+                        "windowSeconds",
+                        "maxAttempts"
+                      ],
+                      "properties": {
+                        "maxAttempts": {
+                          "type": "integer"
+                        },
+                        "windowSeconds": {
+                          "type": "integer"
+                        }
+                      }
+                    },
+                    "sessionAbsoluteTtlSeconds": {
+                      "type": "integer"
+                    },
+                    "sessionIdleTtlSeconds": {
+                      "type": "integer"
+                    },
+                    "trustedProxyCidrs": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/settings/subscription-hosts": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "订阅域名映射列表",
+        "operationId": "settingsSubscriptionHostList",
+        "parameters": [
+          {
+            "type": "integer",
+            "default": 1,
+            "example": 1,
+            "name": "page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 20,
+            "example": 20,
+            "name": "pageSize",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "items",
+                    "total",
+                    "page",
+                    "pageSize"
+                  ],
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "id",
+                          "host",
+                          "entryGroupId",
+                          "entryGroupName",
+                          "tlsStatus",
+                          "certNotAfter",
+                          "createdAt"
+                        ],
+                        "properties": {
+                          "certNotAfter": {
+                            "type": "string"
+                          },
+                          "createdAt": {
+                            "type": "string"
+                          },
+                          "entryGroupId": {
+                            "type": "string"
+                          },
+                          "entryGroupName": {
+                            "type": "string"
+                          },
+                          "host": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "integer"
+                          },
+                          "tlsStatus": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "pageSize": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "新增订阅域名",
+        "operationId": "settingsSubscriptionHostCreate",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "host",
+                "entryGroupId",
+                "tlsMode"
+              ],
+              "properties": {
+                "entryGroupId": {
+                  "type": "string"
+                },
+                "host": {
+                  "type": "string"
+                },
+                "tlsMode": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "item"
+                  ],
+                  "properties": {
+                    "item": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "host",
+                        "entryGroupId",
+                        "entryGroupName",
+                        "tlsStatus",
+                        "certNotAfter",
+                        "createdAt"
+                      ],
+                      "properties": {
+                        "certNotAfter": {
+                          "type": "string"
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        },
+                        "entryGroupId": {
+                          "type": "string"
+                        },
+                        "entryGroupName": {
+                          "type": "string"
+                        },
+                        "host": {
+                          "type": "string"
+                        },
+                        "id": {
+                          "type": "integer"
+                        },
+                        "tlsStatus": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/settings/subscription-hosts/{id}": {
+      "delete": {
+        "consumes": [
+          "application/x-www-form-urlencoded"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "删除订阅域名（幂等）",
+        "operationId": "settingsSubscriptionHostDelete",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {},
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "编辑订阅域名",
+        "operationId": "settingsSubscriptionHostUpdate",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "entryGroupId": {
+                  "type": "string"
+                },
+                "tlsMode": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "item"
+                  ],
+                  "properties": {
+                    "item": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "host",
+                        "entryGroupId",
+                        "entryGroupName",
+                        "tlsStatus",
+                        "certNotAfter",
+                        "createdAt"
+                      ],
+                      "properties": {
+                        "certNotAfter": {
+                          "type": "string"
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        },
+                        "entryGroupId": {
+                          "type": "string"
+                        },
+                        "entryGroupName": {
+                          "type": "string"
+                        },
+                        "host": {
+                          "type": "string"
+                        },
+                        "id": {
+                          "type": "integer"
+                        },
+                        "tlsStatus": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/settings/subscription/formats": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "订阅格式开关",
+        "operationId": "settingsSubscriptionFormats",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "formats"
+                  ],
+                  "properties": {
+                    "formats": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "key",
+                          "label",
+                          "enabled",
+                          "sortOrder",
+                          "source",
+                          "capabilitySupported"
+                        ],
+                        "properties": {
+                          "capabilitySupported": {
+                            "type": "boolean"
+                          },
+                          "enabled": {
+                            "type": "boolean"
+                          },
+                          "key": {
+                            "type": "string"
+                          },
+                          "label": {
+                            "type": "string"
+                          },
+                          "sortOrder": {
+                            "type": "integer"
+                          },
+                          "source": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "保存订阅格式开关",
+        "operationId": "settingsSubscriptionFormatsUpdate",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "formats"
+              ],
+              "properties": {
+                "formats": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "key",
+                      "enabled",
+                      "sortOrder"
+                    ],
+                    "properties": {
+                      "enabled": {
+                        "type": "boolean"
+                      },
+                      "key": {
+                        "type": "string"
+                      },
+                      "sortOrder": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "formats"
+                  ],
+                  "properties": {
+                    "formats": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "key",
+                          "label",
+                          "enabled",
+                          "sortOrder",
+                          "source",
+                          "capabilitySupported"
+                        ],
+                        "properties": {
+                          "capabilitySupported": {
+                            "type": "boolean"
+                          },
+                          "enabled": {
+                            "type": "boolean"
+                          },
+                          "key": {
+                            "type": "string"
+                          },
+                          "label": {
+                            "type": "string"
+                          },
+                          "sortOrder": {
+                            "type": "integer"
+                          },
+                          "source": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/settings/subscription/preview": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "订阅 URL 预览",
+        "operationId": "settingsSubscriptionPreview",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "entryGroupId",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "format",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "url",
+                    "format"
+                  ],
+                  "properties": {
+                    "expiresAt": {
+                      "type": "string"
+                    },
+                    "format": {
+                      "type": "string"
+                    },
+                    "url": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/system/health": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "健康检查",
+        "operationId": "systemSystemHealth",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "items",
+                    "checkedAt"
+                  ],
+                  "properties": {
+                    "checkedAt": {
+                      "type": "string"
+                    },
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "key",
+                          "status",
+                          "detail"
+                        ],
+                        "properties": {
+                          "detail": {
+                            "type": "string"
+                          },
+                          "key": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/system/info": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "版本与兼容信息",
+        "operationId": "systemSystemInfo",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "panel",
+                    "components",
+                    "compatibility"
+                  ],
+                  "properties": {
+                    "compatibility": {
+                      "type": "object",
+                      "required": [
+                        "contractMajor",
+                        "schemaVersion",
+                        "agentMinVersion",
+                        "agentMaxVersion",
+                        "compatible"
+                      ],
+                      "properties": {
+                        "agentMaxVersion": {
+                          "type": "string"
+                        },
+                        "agentMinVersion": {
+                          "type": "string"
+                        },
+                        "compatible": {
+                          "type": "boolean"
+                        },
+                        "contractMajor": {
+                          "type": "integer"
+                        },
+                        "schemaVersion": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "components": {
+                      "type": "object",
+                      "required": [
+                        "coreControl",
+                        "coreNodeMin",
+                        "coreNodeMax",
+                        "agentMin",
+                        "agentMax",
+                        "contract",
+                        "schema",
+                        "xray"
+                      ],
+                      "properties": {
+                        "agentMax": {
+                          "type": "string"
+                        },
+                        "agentMin": {
+                          "type": "string"
+                        },
+                        "contract": {
+                          "type": "string"
+                        },
+                        "coreControl": {
+                          "type": "string"
+                        },
+                        "coreNodeMax": {
+                          "type": "string"
+                        },
+                        "coreNodeMin": {
+                          "type": "string"
+                        },
+                        "schema": {
+                          "type": "string"
+                        },
+                        "xray": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "panel": {
+                      "type": "object",
+                      "required": [
+                        "version",
+                        "commit",
+                        "buildTime",
+                        "uptimeSeconds"
+                      ],
+                      "properties": {
+                        "buildTime": {
+                          "type": "string"
+                        },
+                        "commit": {
+                          "type": "string"
+                        },
+                        "uptimeSeconds": {
+                          "type": "integer"
+                        },
+                        "version": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/traffic": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "流量分组表",
+        "operationId": "trafficTrafficList",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "portGroup",
+            "example": "portGroup",
+            "name": "groupBy",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "from",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "name": "to",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "default": 1,
+            "example": 1,
+            "name": "page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 20,
+            "example": 20,
+            "name": "pageSize",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "sort",
+            "in": "query",
+            "allowEmptyValue": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "items",
+                    "total",
+                    "page",
+                    "pageSize",
+                    "unit"
+                  ],
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "objectType",
+                          "objectId",
+                          "objectName",
+                          "upBytes",
+                          "downBytes",
+                          "totalBytes",
+                          "connections",
+                          "lastUpdatedAt"
+                        ],
+                        "properties": {
+                          "connections": {
+                            "type": "integer"
+                          },
+                          "downBytes": {
+                            "type": "integer"
+                          },
+                          "lastUpdatedAt": {
+                            "type": "string"
+                          },
+                          "objectId": {
+                            "type": "string"
+                          },
+                          "objectName": {
+                            "type": "string"
+                          },
+                          "objectType": {
+                            "type": "string"
+                          },
+                          "totalBytes": {
+                            "type": "integer"
+                          },
+                          "upBytes": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "pageSize": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "unit": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/upgrade/agents": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "发起 Agent 单节点或批次升级",
+        "operationId": "upgradeUpgradeAgents",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "operationId",
+                "targetVersion"
+              ],
+              "properties": {
+                "groupId": {
+                  "type": "string"
+                },
+                "groupType": {
+                  "type": "string"
+                },
+                "nodeIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "operationId": {
+                  "type": "string"
+                },
+                "targetVersion": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "item"
+                  ],
+                  "properties": {
+                    "item": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "scope",
+                        "targetVersion",
+                        "fromVersion",
+                        "status",
+                        "createdBy",
+                        "requestId",
+                        "createdAt"
+                      ],
+                      "properties": {
+                        "batchId": {
+                          "type": "string"
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        },
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "errorCode": {
+                          "type": "string"
+                        },
+                        "errorMessage": {
+                          "type": "string"
+                        },
+                        "finishedAt": {
+                          "type": "string"
+                        },
+                        "fromVersion": {
+                          "type": "string"
+                        },
+                        "id": {
+                          "type": "string"
+                        },
+                        "nodes": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "nodeId",
+                              "nodeName",
+                              "fromVersion",
+                              "toVersion",
+                              "state",
+                              "updatedAt"
+                            ],
+                            "properties": {
+                              "errorCode": {
+                                "type": "string"
+                              },
+                              "errorMessage": {
+                                "type": "string"
+                              },
+                              "fromVersion": {
+                                "type": "string"
+                              },
+                              "nodeId": {
+                                "type": "string"
+                              },
+                              "nodeName": {
+                                "type": "string"
+                              },
+                              "state": {
+                                "type": "string"
+                              },
+                              "toVersion": {
+                                "type": "string"
+                              },
+                              "updatedAt": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "requestId": {
+                          "type": "string"
+                        },
+                        "scope": {
+                          "type": "string"
+                        },
+                        "startedAt": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "targetVersion": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/upgrade/check": {
+      "post": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "手动检查更新",
+        "operationId": "upgradeUpgradeCheck",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "checkedAt",
+                    "latestVersion",
+                    "updateAvailable"
+                  ],
+                  "properties": {
+                    "checkedAt": {
+                      "type": "string"
+                    },
+                    "errorCode": {
+                      "type": "string"
+                    },
+                    "latestVersion": {
+                      "type": "string"
+                    },
+                    "updateAvailable": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/upgrade/panel": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "发起 Panel 升级",
+        "operationId": "upgradeUpgradePanel",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "operationId",
+                "targetVersion"
+              ],
+              "properties": {
+                "operationId": {
+                  "type": "string"
+                },
+                "targetVersion": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "item"
+                  ],
+                  "properties": {
+                    "item": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "scope",
+                        "targetVersion",
+                        "fromVersion",
+                        "status",
+                        "createdBy",
+                        "requestId",
+                        "createdAt"
+                      ],
+                      "properties": {
+                        "batchId": {
+                          "type": "string"
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        },
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "errorCode": {
+                          "type": "string"
+                        },
+                        "errorMessage": {
+                          "type": "string"
+                        },
+                        "finishedAt": {
+                          "type": "string"
+                        },
+                        "fromVersion": {
+                          "type": "string"
+                        },
+                        "id": {
+                          "type": "string"
+                        },
+                        "nodes": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "nodeId",
+                              "nodeName",
+                              "fromVersion",
+                              "toVersion",
+                              "state",
+                              "updatedAt"
+                            ],
+                            "properties": {
+                              "errorCode": {
+                                "type": "string"
+                              },
+                              "errorMessage": {
+                                "type": "string"
+                              },
+                              "fromVersion": {
+                                "type": "string"
+                              },
+                              "nodeId": {
+                                "type": "string"
+                              },
+                              "nodeName": {
+                                "type": "string"
+                              },
+                              "state": {
+                                "type": "string"
+                              },
+                              "toVersion": {
+                                "type": "string"
+                              },
+                              "updatedAt": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "requestId": {
+                          "type": "string"
+                        },
+                        "scope": {
+                          "type": "string"
+                        },
+                        "startedAt": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "targetVersion": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/upgrade/pending": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "待升级清单",
+        "operationId": "upgradeUpgradePending",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "items"
+                  ],
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "nodeId",
+                          "nodeName",
+                          "targetVersion",
+                          "batchId",
+                          "createdAt",
+                          "expiresAt"
+                        ],
+                        "properties": {
+                          "batchId": {
+                            "type": "string"
+                          },
+                          "createdAt": {
+                            "type": "string"
+                          },
+                          "expiresAt": {
+                            "type": "string"
+                          },
+                          "nodeId": {
+                            "type": "string"
+                          },
+                          "nodeName": {
+                            "type": "string"
+                          },
+                          "targetVersion": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/upgrade/status": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "升级状态与锁",
+        "operationId": "upgradeUpgradeStatus",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "panel",
+                    "compatibility"
+                  ],
+                  "properties": {
+                    "activeTask": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "scope",
+                        "targetVersion",
+                        "fromVersion",
+                        "status",
+                        "createdBy",
+                        "requestId",
+                        "createdAt"
+                      ],
+                      "properties": {
+                        "batchId": {
+                          "type": "string"
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        },
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "errorCode": {
+                          "type": "string"
+                        },
+                        "errorMessage": {
+                          "type": "string"
+                        },
+                        "finishedAt": {
+                          "type": "string"
+                        },
+                        "fromVersion": {
+                          "type": "string"
+                        },
+                        "id": {
+                          "type": "string"
+                        },
+                        "nodes": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "nodeId",
+                              "nodeName",
+                              "fromVersion",
+                              "toVersion",
+                              "state",
+                              "updatedAt"
+                            ],
+                            "properties": {
+                              "errorCode": {
+                                "type": "string"
+                              },
+                              "errorMessage": {
+                                "type": "string"
+                              },
+                              "fromVersion": {
+                                "type": "string"
+                              },
+                              "nodeId": {
+                                "type": "string"
+                              },
+                              "nodeName": {
+                                "type": "string"
+                              },
+                              "state": {
+                                "type": "string"
+                              },
+                              "toVersion": {
+                                "type": "string"
+                              },
+                              "updatedAt": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "requestId": {
+                          "type": "string"
+                        },
+                        "scope": {
+                          "type": "string"
+                        },
+                        "startedAt": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "targetVersion": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "compatibility": {
+                      "type": "object",
+                      "required": [
+                        "contractMajor",
+                        "schemaVersion",
+                        "agentMinVersion",
+                        "agentMaxVersion",
+                        "compatible"
+                      ],
+                      "properties": {
+                        "agentMaxVersion": {
+                          "type": "string"
+                        },
+                        "agentMinVersion": {
+                          "type": "string"
+                        },
+                        "compatible": {
+                          "type": "boolean"
+                        },
+                        "contractMajor": {
+                          "type": "integer"
+                        },
+                        "schemaVersion": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "lock": {
+                      "type": "object",
+                      "required": [
+                        "holder",
+                        "scope",
+                        "expiresAt"
+                      ],
+                      "properties": {
+                        "expiresAt": {
+                          "type": "string"
+                        },
+                        "holder": {
+                          "type": "string"
+                        },
+                        "scope": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "panel": {
+                      "type": "object",
+                      "required": [
+                        "currentVersion",
+                        "latestVersion",
+                        "updateAvailable",
+                        "channel",
+                        "composeMode"
+                      ],
+                      "properties": {
+                        "channel": {
+                          "type": "string"
+                        },
+                        "composeMode": {
+                          "type": "boolean"
+                        },
+                        "currentVersion": {
+                          "type": "string"
+                        },
+                        "latestVersion": {
+                          "type": "string"
+                        },
+                        "updateAvailable": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/upgrade/tasks": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "升级历史",
+        "operationId": "upgradeUpgradeTaskList",
+        "parameters": [
+          {
+            "type": "integer",
+            "default": 1,
+            "example": 1,
+            "name": "page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 20,
+            "example": 20,
+            "name": "pageSize",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "scope",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "name": "status",
+            "in": "query",
+            "allowEmptyValue": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "items",
+                    "total",
+                    "page",
+                    "pageSize"
+                  ],
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "id",
+                          "scope",
+                          "targetVersion",
+                          "fromVersion",
+                          "status",
+                          "createdBy",
+                          "requestId",
+                          "createdAt"
+                        ],
+                        "properties": {
+                          "batchId": {
+                            "type": "string"
+                          },
+                          "createdAt": {
+                            "type": "string"
+                          },
+                          "createdBy": {
+                            "type": "string"
+                          },
+                          "errorCode": {
+                            "type": "string"
+                          },
+                          "errorMessage": {
+                            "type": "string"
+                          },
+                          "finishedAt": {
+                            "type": "string"
+                          },
+                          "fromVersion": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "string"
+                          },
+                          "nodes": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "required": [
+                                "nodeId",
+                                "nodeName",
+                                "fromVersion",
+                                "toVersion",
+                                "state",
+                                "updatedAt"
+                              ],
+                              "properties": {
+                                "errorCode": {
+                                  "type": "string"
+                                },
+                                "errorMessage": {
+                                  "type": "string"
+                                },
+                                "fromVersion": {
+                                  "type": "string"
+                                },
+                                "nodeId": {
+                                  "type": "string"
+                                },
+                                "nodeName": {
+                                  "type": "string"
+                                },
+                                "state": {
+                                  "type": "string"
+                                },
+                                "toVersion": {
+                                  "type": "string"
+                                },
+                                "updatedAt": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          },
+                          "requestId": {
+                            "type": "string"
+                          },
+                          "scope": {
+                            "type": "string"
+                          },
+                          "startedAt": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "targetVersion": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "pageSize": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/upgrade/tasks/{id}": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "任务详情",
+        "operationId": "upgradeUpgradeTaskDetail",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "item"
+                  ],
+                  "properties": {
+                    "item": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "scope",
+                        "targetVersion",
+                        "fromVersion",
+                        "status",
+                        "createdBy",
+                        "requestId",
+                        "createdAt"
+                      ],
+                      "properties": {
+                        "batchId": {
+                          "type": "string"
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        },
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "errorCode": {
+                          "type": "string"
+                        },
+                        "errorMessage": {
+                          "type": "string"
+                        },
+                        "finishedAt": {
+                          "type": "string"
+                        },
+                        "fromVersion": {
+                          "type": "string"
+                        },
+                        "id": {
+                          "type": "string"
+                        },
+                        "nodes": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "nodeId",
+                              "nodeName",
+                              "fromVersion",
+                              "toVersion",
+                              "state",
+                              "updatedAt"
+                            ],
+                            "properties": {
+                              "errorCode": {
+                                "type": "string"
+                              },
+                              "errorMessage": {
+                                "type": "string"
+                              },
+                              "fromVersion": {
+                                "type": "string"
+                              },
+                              "nodeId": {
+                                "type": "string"
+                              },
+                              "nodeName": {
+                                "type": "string"
+                              },
+                              "state": {
+                                "type": "string"
+                              },
+                              "toVersion": {
+                                "type": "string"
+                              },
+                              "updatedAt": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "requestId": {
+                          "type": "string"
+                        },
+                        "scope": {
+                          "type": "string"
+                        },
+                        "startedAt": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "targetVersion": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/upgrade/tasks/{id}/retry": {
+      "post": {
+        "consumes": [
+          "application/x-www-form-urlencoded"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "手动重试失败任务",
+        "operationId": "upgradeUpgradeTaskRetry",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "item"
+                  ],
+                  "properties": {
+                    "item": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "scope",
+                        "targetVersion",
+                        "fromVersion",
+                        "status",
+                        "createdBy",
+                        "requestId",
+                        "createdAt"
+                      ],
+                      "properties": {
+                        "batchId": {
+                          "type": "string"
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        },
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "errorCode": {
+                          "type": "string"
+                        },
+                        "errorMessage": {
+                          "type": "string"
+                        },
+                        "finishedAt": {
+                          "type": "string"
+                        },
+                        "fromVersion": {
+                          "type": "string"
+                        },
+                        "id": {
+                          "type": "string"
+                        },
+                        "nodes": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "nodeId",
+                              "nodeName",
+                              "fromVersion",
+                              "toVersion",
+                              "state",
+                              "updatedAt"
+                            ],
+                            "properties": {
+                              "errorCode": {
+                                "type": "string"
+                              },
+                              "errorMessage": {
+                                "type": "string"
+                              },
+                              "fromVersion": {
+                                "type": "string"
+                              },
+                              "nodeId": {
+                                "type": "string"
+                              },
+                              "nodeName": {
+                                "type": "string"
+                              },
+                              "state": {
+                                "type": "string"
+                              },
+                              "toVersion": {
+                                "type": "string"
+                              },
+                              "updatedAt": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "requestId": {
+                          "type": "string"
+                        },
+                        "scope": {
+                          "type": "string"
+                        },
+                        "startedAt": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "targetVersion": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "requestId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ws": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "WebSocket 实时通道",
+        "operationId": "wsWs",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "resources",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "default": 1,
+            "example": 1,
+            "name": "schemaVersion",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
           }
         }
       }

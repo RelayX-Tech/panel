@@ -3,6 +3,147 @@
 
 package types
 
+type Alert struct {
+	Id           int64                  `json:"id"`
+	Level        string                 `json:"level"`
+	AlertType    string                 `json:"type"`
+	ObjectType   string                 `json:"objectType"`
+	ObjectId     string                 `json:"objectId"`
+	ObjectName   string                 `json:"objectName"`
+	Message      string                 `json:"message"`
+	Status       string                 `json:"status"`
+	FirstSeenAt  string                 `json:"firstSeenAt"`
+	LastSeenAt   string                 `json:"lastSeenAt"`
+	ResolvedAt   string                 `json:"resolvedAt,optional"`
+	Notification *AlertNotificationInfo `json:"notification,optional"`
+}
+
+type AlertCounts struct {
+	Active  int              `json:"active"`
+	ByLevel AlertLevelCounts `json:"byLevel"`
+}
+
+type AlertDetailData struct {
+	Alert               Alert                   `json:"alert"`
+	Metrics             interface{}             `json:"metrics,optional"`
+	NotificationHistory []AlertNotificationInfo `json:"notificationHistory"`
+}
+
+type AlertDetailReq struct {
+	Id string `path:"id"`
+}
+
+type AlertDetailResp struct {
+	Code      string          `json:"code"`
+	Message   string          `json:"message"`
+	Data      AlertDetailData `json:"data"`
+	RequestId string          `json:"requestId"`
+}
+
+type AlertLevelCounts struct {
+	Info     int `json:"info"`
+	Warning  int `json:"warning"`
+	Critical int `json:"critical"`
+}
+
+type AlertListData struct {
+	Items    []Alert `json:"items"`
+	Total    int     `json:"total"`
+	Page     int     `json:"page"`
+	PageSize int     `json:"pageSize"`
+}
+
+type AlertListReq struct {
+	Page       int    `form:"page,default=1"`
+	PageSize   int    `form:"pageSize,default=20"`
+	Level      string `form:"level,optional"`
+	Status     string `form:"status,optional"`
+	AlertType  string `form:"type,optional"`
+	ObjectType string `form:"objectType,optional"`
+	From       string `form:"from,optional"`
+	To         string `form:"to,optional"`
+	Q          string `form:"q,optional"`
+	Sort       string `form:"sort,optional"`
+}
+
+type AlertListResp struct {
+	Code      string        `json:"code"`
+	Message   string        `json:"message"`
+	Data      AlertListData `json:"data"`
+	RequestId string        `json:"requestId"`
+}
+
+type AlertNotificationInfo struct {
+	Status    string `json:"status"`
+	Channel   string `json:"channel"`
+	ErrorCode string `json:"errorCode"`
+	SentAt    string `json:"sentAt"`
+}
+
+type AlertTrend struct {
+	Info     []TimePoint `json:"info"`
+	Warning  []TimePoint `json:"warning"`
+	Critical []TimePoint `json:"critical"`
+}
+
+type AuditLog struct {
+	Id         int64  `json:"id"`
+	Ts         string `json:"ts"`
+	Actor      string `json:"actor"`
+	Action     string `json:"action"`
+	ObjectType string `json:"objectType"`
+	ObjectId   string `json:"objectId"`
+	Result     string `json:"result"`
+	RequestId  string `json:"requestId"`
+	Ip         string `json:"ip"`
+}
+
+type AuditLogDetailData struct {
+	Item AuditLog `json:"item"`
+}
+
+type AuditLogDetailReq struct {
+	Id string `path:"id"`
+}
+
+type AuditLogDetailResp struct {
+	Code      string             `json:"code"`
+	Message   string             `json:"message"`
+	Data      AuditLogDetailData `json:"data"`
+	RequestId string             `json:"requestId"`
+}
+
+type AuditLogListData struct {
+	Items    []AuditLog `json:"items"`
+	Total    int        `json:"total"`
+	Page     int        `json:"page"`
+	PageSize int        `json:"pageSize"`
+}
+
+type AuditLogListReq struct {
+	From       string `form:"from,optional"`
+	To         string `form:"to,optional"`
+	Actor      string `form:"actor,optional"`
+	Action     string `form:"action,optional"`
+	ObjectType string `form:"objectType,optional"`
+	ObjectId   string `form:"objectId,optional"`
+	RequestId  string `form:"requestId,optional"`
+	Page       int    `form:"page,default=1"`
+	PageSize   int    `form:"pageSize,default=20"`
+}
+
+type AuditLogListResp struct {
+	Code      string           `json:"code"`
+	Message   string           `json:"message"`
+	Data      AuditLogListData `json:"data"`
+	RequestId string           `json:"requestId"`
+}
+
+type ByStatusCount struct {
+	Status string `json:"status"`
+	Count  int    `json:"count"`
+}
+
 type ChangePasswordReq struct {
 	OldPassword string `json:"oldPassword"`
 	NewPassword string `json:"newPassword"`
@@ -13,6 +154,232 @@ type ChangePasswordResp struct {
 	Message   string      `json:"message"`
 	Data      interface{} `json:"data"`
 	RequestId string      `json:"requestId"`
+}
+
+type ClientListData struct {
+	Items    []ClientRow `json:"items"`
+	Total    int         `json:"total"`
+	Page     int         `json:"page"`
+	PageSize int         `json:"pageSize"`
+}
+
+type ClientListReq struct {
+	PortGroupId string `form:"portGroupId,optional"`
+	PortId      string `form:"portId,optional"`
+	Q           string `form:"q,optional"`
+	Page        int    `form:"page,default=1"`
+	PageSize    int    `form:"pageSize,default=20"`
+}
+
+type ClientListResp struct {
+	Code      string         `json:"code"`
+	Message   string         `json:"message"`
+	Data      ClientListData `json:"data"`
+	RequestId string         `json:"requestId"`
+}
+
+type ClientRow struct {
+	ClientId       string `json:"clientId"`
+	Email          string `json:"email"`
+	PortId         string `json:"portId"`
+	PortGroupId    string `json:"portGroupId"`
+	UpBytes        int64  `json:"upBytes"`
+	DownBytes      int64  `json:"downBytes"`
+	LastOnlineAt   string `json:"lastOnlineAt"`
+	LastSubFetchAt string `json:"lastSubFetchAt"`
+}
+
+type CompatibilityInfo struct {
+	ContractMajor   int    `json:"contractMajor"`
+	SchemaVersion   string `json:"schemaVersion"`
+	AgentMinVersion string `json:"agentMinVersion"`
+	AgentMaxVersion string `json:"agentMaxVersion"`
+	Compatible      bool   `json:"compatible"`
+}
+
+type CountPair struct {
+	Online int `json:"online"`
+	Total  int `json:"total"`
+}
+
+type DashboardSummaryData struct {
+	Nodes         NodeCounts      `json:"nodes"`
+	PortGroups    PortGroupCounts `json:"portGroups"`
+	Alerts        AlertCounts     `json:"alerts"`
+	ClientsOnline int             `json:"clientsOnline"`
+	Throughput    Throughput      `json:"throughput"`
+	UpdatedAt     string          `json:"updatedAt"`
+}
+
+type DashboardSummaryResp struct {
+	Code      string               `json:"code"`
+	Message   string               `json:"message"`
+	Data      DashboardSummaryData `json:"data"`
+	RequestId string               `json:"requestId"`
+}
+
+type DashboardTrafficData struct {
+	TimeRange string        `json:"range"`
+	Unit      string        `json:"unit"`
+	Series    TrafficSeries `json:"series"`
+}
+
+type DashboardTrafficReq struct {
+	TimeRange string `form:"range,default=24h"`
+}
+
+type DashboardTrafficResp struct {
+	Code      string               `json:"code"`
+	Message   string               `json:"message"`
+	Data      DashboardTrafficData `json:"data"`
+	RequestId string               `json:"requestId"`
+}
+
+type GeneralSettingsData struct {
+	Listen                    string `json:"listen"`
+	PublicUrl                 string `json:"publicUrl"`
+	Path                      string `json:"path"`
+	SessionIdleTtlSeconds     int    `json:"sessionIdleTtlSeconds"`
+	SessionAbsoluteTtlSeconds int    `json:"sessionAbsoluteTtlSeconds"`
+	DefaultLocale             string `json:"defaultLocale"`
+	DefaultTheme              string `json:"defaultTheme"`
+	PageSize                  int    `json:"pageSize"`
+	DeploymentMode            string `json:"deploymentMode"`
+	Instances                 int    `json:"instances"`
+}
+
+type GeneralSettingsResp struct {
+	Code      string              `json:"code"`
+	Message   string              `json:"message"`
+	Data      GeneralSettingsData `json:"data"`
+	RequestId string              `json:"requestId"`
+}
+
+type GeoCategory struct {
+	Category     string `json:"category"`
+	EntriesCount int    `json:"entriesCount"`
+}
+
+type GeoCategoryListData struct {
+	Items    []GeoCategory `json:"items"`
+	Total    int           `json:"total"`
+	Page     int           `json:"page"`
+	PageSize int           `json:"pageSize"`
+}
+
+type GeoCategoryListReq struct {
+	Id       string `path:"id"`
+	Page     int    `form:"page,default=1"`
+	PageSize int    `form:"pageSize,default=50"`
+}
+
+type GeoCategoryListResp struct {
+	Code      string              `json:"code"`
+	Message   string              `json:"message"`
+	Data      GeoCategoryListData `json:"data"`
+	RequestId string              `json:"requestId"`
+}
+
+type GeoEntry struct {
+	Value    string `json:"value"`
+	Category string `json:"category"`
+}
+
+type GeoEntryListData struct {
+	Items    []GeoEntry `json:"items"`
+	Total    int        `json:"total"`
+	Page     int        `json:"page"`
+	PageSize int        `json:"pageSize"`
+}
+
+type GeoEntryListReq struct {
+	Id       string `path:"id"`
+	Category string `form:"category,optional"`
+	Page     int    `form:"page,default=1"`
+	PageSize int    `form:"pageSize,default=50"`
+}
+
+type GeoEntryListResp struct {
+	Code      string           `json:"code"`
+	Message   string           `json:"message"`
+	Data      GeoEntryListData `json:"data"`
+	RequestId string           `json:"requestId"`
+}
+
+type GeoFile struct {
+	Id              int64  `json:"id"`
+	Kind            string `json:"kind"`
+	Name            string `json:"name"`
+	Version         string `json:"version"`
+	SizeBytes       int64  `json:"sizeBytes"`
+	CategoriesCount int    `json:"categoriesCount"`
+	Checksum        string `json:"checksum"`
+	UpdatedAt       string `json:"updatedAt"`
+	Status          string `json:"status"`
+}
+
+type GeoFileListData struct {
+	Items    []GeoFile `json:"items"`
+	Total    int       `json:"total"`
+	Page     int       `json:"page"`
+	PageSize int       `json:"pageSize"`
+}
+
+type GeoFileListReq struct {
+	Kind     string `form:"kind,optional"`
+	Page     int    `form:"page,default=1"`
+	PageSize int    `form:"pageSize,default=20"`
+}
+
+type GeoFileListResp struct {
+	Code      string          `json:"code"`
+	Message   string          `json:"message"`
+	Data      GeoFileListData `json:"data"`
+	RequestId string          `json:"requestId"`
+}
+
+type GeoFileReq struct {
+	Id string `path:"id"`
+}
+
+type GeoFileUpdateData struct {
+	State     string `json:"state"`
+	Version   string `json:"version"`
+	ErrorCode string `json:"errorCode,optional"`
+}
+
+type GeoFileUpdateResp struct {
+	Code      string            `json:"code"`
+	Message   string            `json:"message"`
+	Data      GeoFileUpdateData `json:"data"`
+	RequestId string            `json:"requestId"`
+}
+
+type GeoUploadResp struct {
+	Code      string  `json:"code"`
+	Message   string  `json:"message"`
+	Data      GeoFile `json:"data"`
+	RequestId string  `json:"requestId"`
+}
+
+type GeoValidateData struct {
+	Valid           bool   `json:"valid"`
+	CategoriesCount int    `json:"categoriesCount"`
+	EntriesCount    int    `json:"entriesCount"`
+	Error           string `json:"error,optional"`
+}
+
+type GeoValidateResp struct {
+	Code      string          `json:"code"`
+	Message   string          `json:"message"`
+	Data      GeoValidateData `json:"data"`
+	RequestId string          `json:"requestId"`
+}
+
+type HealthItem struct {
+	Key    string `json:"key"`
+	Status string `json:"status"`
+	Detail string `json:"detail"`
 }
 
 type LoginData struct {
@@ -39,6 +406,447 @@ type LogoutResp struct {
 	RequestId string      `json:"requestId"`
 }
 
+type MetricSeries struct {
+	Metric string      `json:"metric"`
+	Unit   string      `json:"unit"`
+	Points []TimePoint `json:"points"`
+}
+
+type MonitoringOverviewData struct {
+	Cards         OverviewCards     `json:"cards"`
+	Traffic       TrafficSeries     `json:"traffic"`
+	AlertTrend    AlertTrend        `json:"alertTrend"`
+	NodeHealth    []NodeHealthGroup `json:"nodeHealth"`
+	TopPortGroups []TopPortGroup    `json:"topPortGroups"`
+	RecentAlerts  []RecentAlert     `json:"recentAlerts"`
+}
+
+type MonitoringOverviewReq struct {
+	TimeRange string `form:"range,default=24h"`
+}
+
+type MonitoringOverviewResp struct {
+	Code      string                 `json:"code"`
+	Message   string                 `json:"message"`
+	Data      MonitoringOverviewData `json:"data"`
+	RequestId string                 `json:"requestId"`
+}
+
+type NodeCounts struct {
+	Entry  CountPair `json:"entry"`
+	Tunnel CountPair `json:"tunnel"`
+}
+
+type NodeDetail struct {
+	Id                  string        `json:"id"`
+	Name                string        `json:"name"`
+	NodeType            string        `json:"type"`
+	GroupId             string        `json:"groupId"`
+	GroupName           string        `json:"groupName"`
+	Region              string        `json:"region"`
+	Ip                  string        `json:"ip"`
+	Status              string        `json:"status"`
+	DisplayState        string        `json:"displayState,optional"`
+	CpuPercent          float64       `json:"cpuPercent"`
+	MemPercent          float64       `json:"memPercent"`
+	DiskPercent         float64       `json:"diskPercent"`
+	Load1               float64       `json:"load1"`
+	TcpConnections      int           `json:"tcpConnections"`
+	NetInBps            float64       `json:"netInBps"`
+	NetOutBps           float64       `json:"netOutBps"`
+	XrayState           string        `json:"xrayState"`
+	Restarts            int           `json:"restarts"`
+	LastSeenAt          string        `json:"lastSeenAt"`
+	AgentVersion        string        `json:"agentVersion"`
+	XrayVersion         string        `json:"xrayVersion"`
+	CertificateNotAfter string        `json:"certificateNotAfter"`
+	Nics                []NodeNIC     `json:"nics"`
+	Xray                NodeXray      `json:"xray"`
+	Probe               NodeProbeInfo `json:"probe"`
+}
+
+type NodeDetailReq struct {
+	Id string `path:"id"`
+}
+
+type NodeDetailResp struct {
+	Code      string     `json:"code"`
+	Message   string     `json:"message"`
+	Data      NodeDetail `json:"data"`
+	RequestId string     `json:"requestId"`
+}
+
+type NodeEvent struct {
+	Id         int64       `json:"id"`
+	NodeId     string      `json:"nodeId"`
+	EventType  string      `json:"type"`
+	Level      string      `json:"level"`
+	Message    string      `json:"message"`
+	Metadata   interface{} `json:"metadata"`
+	OccurredAt string      `json:"occurredAt"`
+}
+
+type NodeEventsData struct {
+	Items    []NodeEvent `json:"items"`
+	Total    int         `json:"total"`
+	Page     int         `json:"page"`
+	PageSize int         `json:"pageSize"`
+}
+
+type NodeEventsReq struct {
+	Id        string `path:"id"`
+	Page      int    `form:"page,default=1"`
+	PageSize  int    `form:"pageSize,default=20"`
+	EventType string `form:"type,optional"`
+	From      string `form:"from,optional"`
+	To        string `form:"to,optional"`
+}
+
+type NodeEventsResp struct {
+	Code      string         `json:"code"`
+	Message   string         `json:"message"`
+	Data      NodeEventsData `json:"data"`
+	RequestId string         `json:"requestId"`
+}
+
+type NodeHealthGroup struct {
+	GroupType string           `json:"groupType"`
+	GroupId   string           `json:"groupId"`
+	GroupName string           `json:"groupName"`
+	Nodes     []NodeHealthNode `json:"nodes"`
+}
+
+type NodeHealthNode struct {
+	NodeId     string  `json:"nodeId"`
+	NodeName   string  `json:"nodeName"`
+	Status     string  `json:"status"`
+	CpuPercent float64 `json:"cpuPercent"`
+	MemPercent float64 `json:"memPercent"`
+}
+
+type NodeListData struct {
+	Items    []NodeSummary `json:"items"`
+	Total    int           `json:"total"`
+	Page     int           `json:"page"`
+	PageSize int           `json:"pageSize"`
+}
+
+type NodeListReq struct {
+	Page     int    `form:"page,default=1"`
+	PageSize int    `form:"pageSize,default=20"`
+	NodeType string `form:"type,optional"`
+	Status   string `form:"status,optional"`
+	GroupId  string `form:"groupId,optional"`
+	Region   string `form:"region,optional"`
+	Q        string `form:"q,optional"`
+	Sort     string `form:"sort,optional"`
+}
+
+type NodeListResp struct {
+	Code      string       `json:"code"`
+	Message   string       `json:"message"`
+	Data      NodeListData `json:"data"`
+	RequestId string       `json:"requestId"`
+}
+
+type NodeMetricsData struct {
+	Series []MetricSeries `json:"series"`
+}
+
+type NodeMetricsReq struct {
+	Id        string `path:"id"`
+	TimeRange string `form:"range,default=24h"`
+	Metrics   string `form:"metrics,optional"`
+}
+
+type NodeMetricsResp struct {
+	Code      string          `json:"code"`
+	Message   string          `json:"message"`
+	Data      NodeMetricsData `json:"data"`
+	RequestId string          `json:"requestId"`
+}
+
+type NodeNIC struct {
+	Name      string   `json:"name"`
+	Mac       string   `json:"mac"`
+	Mtu       int      `json:"mtu"`
+	Up        bool     `json:"up"`
+	Addresses []string `json:"addresses"`
+}
+
+type NodeProbeInfo struct {
+	ProbeType           string `json:"type"`
+	LatencyMs           int64  `json:"latencyMs"`
+	Success             bool   `json:"success"`
+	Failures            int    `json:"failures"`
+	ConsecutiveFailures int    `json:"consecutiveFailures"`
+	CheckedAt           string `json:"checkedAt"`
+}
+
+type NodeProbeReq struct {
+	Id             string `path:"id"`
+	ProbeType      string `json:"type"`
+	Target         string `json:"target"`
+	TimeoutMs      int    `json:"timeoutMs,optional"`
+	ExpectedStatus int    `json:"expectedStatus,optional"`
+}
+
+type NodeProbeResp struct {
+	Code      string          `json:"code"`
+	Message   string          `json:"message"`
+	Data      NodeProbeResult `json:"data"`
+	RequestId string          `json:"requestId"`
+}
+
+type NodeProbeResult struct {
+	Success    bool   `json:"success"`
+	LatencyMs  int64  `json:"latencyMs"`
+	StatusCode int    `json:"statusCode,optional"`
+	Error      string `json:"error,optional"`
+}
+
+type NodeSummary struct {
+	Id             string  `json:"id"`
+	Name           string  `json:"name"`
+	NodeType       string  `json:"type"`
+	GroupId        string  `json:"groupId"`
+	GroupName      string  `json:"groupName"`
+	Region         string  `json:"region"`
+	Ip             string  `json:"ip"`
+	Status         string  `json:"status"`
+	DisplayState   string  `json:"displayState,optional"`
+	CpuPercent     float64 `json:"cpuPercent"`
+	MemPercent     float64 `json:"memPercent"`
+	DiskPercent    float64 `json:"diskPercent"`
+	Load1          float64 `json:"load1"`
+	TcpConnections int     `json:"tcpConnections"`
+	NetInBps       float64 `json:"netInBps"`
+	NetOutBps      float64 `json:"netOutBps"`
+	XrayState      string  `json:"xrayState"`
+	Restarts       int     `json:"restarts"`
+	LastSeenAt     string  `json:"lastSeenAt"`
+}
+
+type NodeXray struct {
+	Pid        int     `json:"pid"`
+	CpuPercent float64 `json:"cpuPercent"`
+	MemBytes   int64   `json:"memBytes"`
+	Restarts   int     `json:"restarts"`
+	Inbounds   int     `json:"inbounds"`
+	Outbounds  int     `json:"outbounds"`
+}
+
+type NotificationChannel struct {
+	Id           int64  `json:"id"`
+	Name         string `json:"name"`
+	ChannelType  string `json:"type"`
+	TargetMasked string `json:"targetMasked"`
+	MinLevel     string `json:"minLevel"`
+	Enabled      bool   `json:"enabled"`
+	LastSentAt   string `json:"lastSentAt,optional"`
+}
+
+type NotificationCreateReq struct {
+	Name        string `json:"name"`
+	ChannelType string `json:"type"`
+	Target      string `json:"target"`
+	MinLevel    string `json:"minLevel"`
+	Enabled     bool   `json:"enabled"`
+}
+
+type NotificationDeleteResp struct {
+	Code      string      `json:"code"`
+	Message   string      `json:"message"`
+	Data      interface{} `json:"data"`
+	RequestId string      `json:"requestId"`
+}
+
+type NotificationItemData struct {
+	Item NotificationChannel `json:"item"`
+}
+
+type NotificationItemResp struct {
+	Code      string               `json:"code"`
+	Message   string               `json:"message"`
+	Data      NotificationItemData `json:"data"`
+	RequestId string               `json:"requestId"`
+}
+
+type NotificationListData struct {
+	Items []NotificationChannel `json:"items"`
+}
+
+type NotificationListResp struct {
+	Code      string               `json:"code"`
+	Message   string               `json:"message"`
+	Data      NotificationListData `json:"data"`
+	RequestId string               `json:"requestId"`
+}
+
+type NotificationTestData struct {
+	Success   bool   `json:"success"`
+	ErrorCode string `json:"errorCode,optional"`
+}
+
+type NotificationTestReq struct {
+	Id string `path:"id"`
+}
+
+type NotificationTestResp struct {
+	Code      string               `json:"code"`
+	Message   string               `json:"message"`
+	Data      NotificationTestData `json:"data"`
+	RequestId string               `json:"requestId"`
+}
+
+type NotificationUpdateReq struct {
+	Id       string  `path:"id"`
+	Name     *string `json:"name,optional"`
+	Target   *string `json:"target,optional"`
+	MinLevel *string `json:"minLevel,optional"`
+	Enabled  *bool   `json:"enabled,optional"`
+}
+
+type OverviewCards struct {
+	ActiveAlerts  int     `json:"activeAlerts"`
+	OnlineNodes   int     `json:"onlineNodes"`
+	OnlineClients int     `json:"onlineClients"`
+	InBps         float64 `json:"inBps"`
+	OutBps        float64 `json:"outBps"`
+	XrayAbnormal  int     `json:"xrayAbnormal"`
+}
+
+type PortGroupCounts struct {
+	ByStatus []ByStatusCount `json:"byStatus"`
+}
+
+type ProbeApplyNode struct {
+	NodeId    string `json:"nodeId"`
+	NodeName  string `json:"nodeName"`
+	State     string `json:"state"`
+	Version   int64  `json:"version"`
+	ElapsedMs int64  `json:"elapsedMs"`
+	ErrorCode string `json:"errorCode,optional"`
+}
+
+type ProbeApplyStatusData struct {
+	TaskId    string           `json:"taskId"`
+	State     string           `json:"state"`
+	UpdatedAt string           `json:"updatedAt"`
+	Nodes     []ProbeApplyNode `json:"nodes"`
+}
+
+type ProbeApplyStatusResp struct {
+	Code      string               `json:"code"`
+	Message   string               `json:"message"`
+	Data      ProbeApplyStatusData `json:"data"`
+	RequestId string               `json:"requestId"`
+}
+
+type ProbeSettingsData struct {
+	FrequencySeconds  int    `json:"frequencySeconds"`
+	TimeoutMs         int    `json:"timeoutMs"`
+	FailureThreshold  int    `json:"failureThreshold"`
+	RecoveryThreshold int    `json:"recoveryThreshold"`
+	UpdatedAt         string `json:"updatedAt"`
+}
+
+type ProbeSettingsResp struct {
+	Code      string            `json:"code"`
+	Message   string            `json:"message"`
+	Data      ProbeSettingsData `json:"data"`
+	RequestId string            `json:"requestId"`
+}
+
+type ProbeSettingsUpdateReq struct {
+	FrequencySeconds  int `json:"frequencySeconds"`
+	TimeoutMs         int `json:"timeoutMs"`
+	FailureThreshold  int `json:"failureThreshold"`
+	RecoveryThreshold int `json:"recoveryThreshold"`
+}
+
+type ProfileData struct {
+	Id          string `json:"id"`
+	Account     string `json:"account"`
+	DisplayName string `json:"displayName"`
+}
+
+type ProfileResp struct {
+	Code      string      `json:"code"`
+	Message   string      `json:"message"`
+	Data      ProfileData `json:"data"`
+	RequestId string      `json:"requestId"`
+}
+
+type ProfileUpdateReq struct {
+	DisplayName string `json:"displayName"`
+}
+
+type RateLimitSpec struct {
+	WindowSeconds int `json:"windowSeconds"`
+	MaxAttempts   int `json:"maxAttempts"`
+}
+
+type RecentAlert struct {
+	Id         int64  `json:"id"`
+	Level      string `json:"level"`
+	AlertType  string `json:"type"`
+	ObjectName string `json:"objectName"`
+	Message    string `json:"message"`
+	LastSeenAt string `json:"lastSeenAt"`
+}
+
+type RetentionSettingsData struct {
+	RawDays              int    `json:"rawDays"`
+	MinuteDays           int    `json:"minuteDays"`
+	HourDays             int    `json:"hourDays"`
+	SnapshotPerNode      int    `json:"snapshotPerNode"`
+	SnapshotPerPortGroup int    `json:"snapshotPerPortGroup"`
+	SnapshotDays         int    `json:"snapshotDays"`
+	CleanupAtUtc         string `json:"cleanupAtUtc"`
+	AuditDays            int    `json:"auditDays"`
+}
+
+type RetentionSettingsResp struct {
+	Code      string                `json:"code"`
+	Message   string                `json:"message"`
+	Data      RetentionSettingsData `json:"data"`
+	RequestId string                `json:"requestId"`
+}
+
+type RetentionStorageData struct {
+	DatabaseSizeBytes         int64   `json:"databaseSizeBytes"`
+	TrafficPartitionSizeBytes int64   `json:"trafficPartitionSizeBytes"`
+	EarliestRecordAt          *string `json:"earliestRecordAt"`
+	LatestRecordAt            *string `json:"latestRecordAt"`
+	CollectedAt               string  `json:"collectedAt"`
+}
+
+type RetentionStorageResp struct {
+	Code      string               `json:"code"`
+	Message   string               `json:"message"`
+	Data      RetentionStorageData `json:"data"`
+	RequestId string               `json:"requestId"`
+}
+
+type SecuritySettingsData struct {
+	SessionIdleTtlSeconds     int           `json:"sessionIdleTtlSeconds"`
+	SessionAbsoluteTtlSeconds int           `json:"sessionAbsoluteTtlSeconds"`
+	LoginRateLimit            RateLimitSpec `json:"loginRateLimit"`
+	PasswordRateLimit         RateLimitSpec `json:"passwordRateLimit"`
+	AllowedOrigins            []string      `json:"allowedOrigins"`
+	CookieSecure              bool          `json:"cookieSecure"`
+	TrustedProxyCidrs         []string      `json:"trustedProxyCidrs"`
+	CertFingerprintPinning    bool          `json:"certFingerprintPinning"`
+}
+
+type SecuritySettingsResp struct {
+	Code      string               `json:"code"`
+	Message   string               `json:"message"`
+	Data      SecuritySettingsData `json:"data"`
+	RequestId string               `json:"requestId"`
+}
+
 type SessionData struct {
 	User    UserInfo    `json:"user"`
 	Session SessionInfo `json:"session"`
@@ -49,6 +857,17 @@ type SessionInfo struct {
 	AbsoluteExpiresAt string `json:"absoluteExpiresAt"`
 }
 
+type SessionListData struct {
+	Items []SessionRow `json:"items"`
+}
+
+type SessionListResp struct {
+	Code      string          `json:"code"`
+	Message   string          `json:"message"`
+	Data      SessionListData `json:"data"`
+	RequestId string          `json:"requestId"`
+}
+
 type SessionResp struct {
 	Code      string      `json:"code"`
 	Message   string      `json:"message"`
@@ -56,8 +875,441 @@ type SessionResp struct {
 	RequestId string      `json:"requestId"`
 }
 
+type SessionRevokeReq struct {
+	Id string `path:"id"`
+}
+
+type SessionRevokeResp struct {
+	Code      string      `json:"code"`
+	Message   string      `json:"message"`
+	Data      interface{} `json:"data"`
+	RequestId string      `json:"requestId"`
+}
+
+type SessionRow struct {
+	Id                string `json:"id"`
+	Current           bool   `json:"current"`
+	UserAgent         string `json:"userAgent"`
+	Ip                string `json:"ip"`
+	CreatedAt         string `json:"createdAt"`
+	LastActiveAt      string `json:"lastActiveAt"`
+	IdleExpiresAt     string `json:"idleExpiresAt"`
+	AbsoluteExpiresAt string `json:"absoluteExpiresAt"`
+}
+
+type SubscriptionFormat struct {
+	Key                 string `json:"key"`
+	Label               string `json:"label"`
+	Enabled             bool   `json:"enabled"`
+	SortOrder           int    `json:"sortOrder"`
+	Source              string `json:"source"`
+	CapabilitySupported bool   `json:"capabilitySupported"`
+}
+
+type SubscriptionFormatUpdate struct {
+	Key       string `json:"key"`
+	Enabled   bool   `json:"enabled"`
+	SortOrder int    `json:"sortOrder"`
+}
+
+type SubscriptionFormatsData struct {
+	Formats []SubscriptionFormat `json:"formats"`
+}
+
+type SubscriptionFormatsResp struct {
+	Code      string                  `json:"code"`
+	Message   string                  `json:"message"`
+	Data      SubscriptionFormatsData `json:"data"`
+	RequestId string                  `json:"requestId"`
+}
+
+type SubscriptionFormatsUpdateReq struct {
+	Formats []SubscriptionFormatUpdate `json:"formats"`
+}
+
+type SubscriptionHost struct {
+	Id             int64  `json:"id"`
+	Host           string `json:"host"`
+	EntryGroupId   string `json:"entryGroupId"`
+	EntryGroupName string `json:"entryGroupName"`
+	TlsStatus      string `json:"tlsStatus"`
+	CertNotAfter   string `json:"certNotAfter"`
+	CreatedAt      string `json:"createdAt"`
+}
+
+type SubscriptionHostCreateReq struct {
+	Host         string `json:"host"`
+	EntryGroupId string `json:"entryGroupId"`
+	TlsMode      string `json:"tlsMode"`
+}
+
+type SubscriptionHostDeleteResp struct {
+	Code      string      `json:"code"`
+	Message   string      `json:"message"`
+	Data      interface{} `json:"data"`
+	RequestId string      `json:"requestId"`
+}
+
+type SubscriptionHostItemData struct {
+	Item SubscriptionHost `json:"item"`
+}
+
+type SubscriptionHostItemResp struct {
+	Code      string                   `json:"code"`
+	Message   string                   `json:"message"`
+	Data      SubscriptionHostItemData `json:"data"`
+	RequestId string                   `json:"requestId"`
+}
+
+type SubscriptionHostListData struct {
+	Items    []SubscriptionHost `json:"items"`
+	Total    int                `json:"total"`
+	Page     int                `json:"page"`
+	PageSize int                `json:"pageSize"`
+}
+
+type SubscriptionHostListReq struct {
+	Page     int `form:"page,default=1"`
+	PageSize int `form:"pageSize,default=20"`
+}
+
+type SubscriptionHostListResp struct {
+	Code      string                   `json:"code"`
+	Message   string                   `json:"message"`
+	Data      SubscriptionHostListData `json:"data"`
+	RequestId string                   `json:"requestId"`
+}
+
+type SubscriptionHostUpdateReq struct {
+	Id           string  `path:"id"`
+	EntryGroupId *string `json:"entryGroupId,optional"`
+	TlsMode      *string `json:"tlsMode,optional"`
+}
+
+type SubscriptionPreviewData struct {
+	Url       string `json:"url"`
+	Format    string `json:"format"`
+	ExpiresAt string `json:"expiresAt,optional"`
+}
+
+type SubscriptionPreviewReq struct {
+	EntryGroupId string `form:"entryGroupId"`
+	Format       string `form:"format"`
+}
+
+type SubscriptionPreviewResp struct {
+	Code      string                  `json:"code"`
+	Message   string                  `json:"message"`
+	Data      SubscriptionPreviewData `json:"data"`
+	RequestId string                  `json:"requestId"`
+}
+
+type SystemComponents struct {
+	CoreControl string `json:"coreControl"`
+	CoreNodeMin string `json:"coreNodeMin"`
+	CoreNodeMax string `json:"coreNodeMax"`
+	AgentMin    string `json:"agentMin"`
+	AgentMax    string `json:"agentMax"`
+	Contract    string `json:"contract"`
+	Schema      string `json:"schema"`
+	Xray        string `json:"xray"`
+}
+
+type SystemHealthData struct {
+	Items     []HealthItem `json:"items"`
+	CheckedAt string       `json:"checkedAt"`
+}
+
+type SystemHealthResp struct {
+	Code      string           `json:"code"`
+	Message   string           `json:"message"`
+	Data      SystemHealthData `json:"data"`
+	RequestId string           `json:"requestId"`
+}
+
+type SystemInfoData struct {
+	Panel         SystemPanel       `json:"panel"`
+	Components    SystemComponents  `json:"components"`
+	Compatibility CompatibilityInfo `json:"compatibility"`
+}
+
+type SystemInfoResp struct {
+	Code      string         `json:"code"`
+	Message   string         `json:"message"`
+	Data      SystemInfoData `json:"data"`
+	RequestId string         `json:"requestId"`
+}
+
+type SystemPanel struct {
+	Version       string `json:"version"`
+	Commit        string `json:"commit"`
+	BuildTime     string `json:"buildTime"`
+	UptimeSeconds int64  `json:"uptimeSeconds"`
+}
+
+type Throughput struct {
+	InBps  float64 `json:"inBps"`
+	OutBps float64 `json:"outBps"`
+}
+
+type TimePoint struct {
+	Ts    string  `json:"ts"`
+	Value float64 `json:"value"`
+}
+
+type TopPortGroup struct {
+	PortGroupId   string `json:"portGroupId"`
+	PortGroupName string `json:"portGroupName"`
+	TotalBytes    int64  `json:"totalBytes"`
+	Connections   int    `json:"connections"`
+}
+
+type TrafficListData struct {
+	Items    []TrafficRow `json:"items"`
+	Total    int          `json:"total"`
+	Page     int          `json:"page"`
+	PageSize int          `json:"pageSize"`
+	Unit     string       `json:"unit"`
+}
+
+type TrafficListReq struct {
+	GroupBy  string `form:"groupBy,default=portGroup"`
+	From     string `form:"from,optional"`
+	To       string `form:"to,optional"`
+	Page     int    `form:"page,default=1"`
+	PageSize int    `form:"pageSize,default=20"`
+	Sort     string `form:"sort,optional"`
+}
+
+type TrafficListResp struct {
+	Code      string          `json:"code"`
+	Message   string          `json:"message"`
+	Data      TrafficListData `json:"data"`
+	RequestId string          `json:"requestId"`
+}
+
+type TrafficRow struct {
+	ObjectType    string `json:"objectType"`
+	ObjectId      string `json:"objectId"`
+	ObjectName    string `json:"objectName"`
+	UpBytes       int64  `json:"upBytes"`
+	DownBytes     int64  `json:"downBytes"`
+	TotalBytes    int64  `json:"totalBytes"`
+	Connections   int    `json:"connections"`
+	LastUpdatedAt string `json:"lastUpdatedAt"`
+}
+
+type TrafficSeries struct {
+	Up   []TimePoint `json:"up"`
+	Down []TimePoint `json:"down"`
+}
+
+type TunnelLink struct {
+	TunnelGroupId   string  `json:"tunnelGroupId"`
+	TunnelGroupName string  `json:"tunnelGroupName"`
+	NodeId          string  `json:"nodeId"`
+	NodeName        string  `json:"nodeName"`
+	LatencyMs       float64 `json:"latencyMs"`
+	LossRate        float64 `json:"lossRate"`
+	JitterMs        float64 `json:"jitterMs"`
+	Score           float64 `json:"score"`
+	Status          string  `json:"status"`
+	LastProbeAt     string  `json:"lastProbeAt"`
+}
+
+type TunnelListData struct {
+	Links      []TunnelLink      `json:"links"`
+	Series     TunnelSeries      `json:"series"`
+	PathEvents []TunnelPathEvent `json:"pathEvents"`
+}
+
+type TunnelListReq struct {
+	TimeRange     string `form:"range,default=24h"`
+	TunnelGroupId string `form:"tunnelGroupId,optional"`
+	Status        string `form:"status,optional"`
+}
+
+type TunnelListResp struct {
+	Code      string         `json:"code"`
+	Message   string         `json:"message"`
+	Data      TunnelListData `json:"data"`
+	RequestId string         `json:"requestId"`
+}
+
+type TunnelPathEvent struct {
+	Ts          string `json:"ts"`
+	PortGroupId string `json:"portGroupId"`
+	FromNodeId  string `json:"fromNodeId"`
+	ToNodeId    string `json:"toNodeId"`
+	Reason      string `json:"reason"`
+}
+
+type TunnelSeries struct {
+	Latency []TimePoint `json:"latency"`
+	Loss    []TimePoint `json:"loss"`
+}
+
+type UpgradeAgentReq struct {
+	OperationId   string   `json:"operationId"`
+	TargetVersion string   `json:"targetVersion"`
+	NodeIds       []string `json:"nodeIds,optional"`
+	GroupId       string   `json:"groupId,optional"`
+	GroupType     string   `json:"groupType,optional"`
+}
+
+type UpgradeCheckData struct {
+	CheckedAt       string `json:"checkedAt"`
+	LatestVersion   string `json:"latestVersion"`
+	UpdateAvailable bool   `json:"updateAvailable"`
+	ErrorCode       string `json:"errorCode,optional"`
+}
+
+type UpgradeCheckResp struct {
+	Code      string           `json:"code"`
+	Message   string           `json:"message"`
+	Data      UpgradeCheckData `json:"data"`
+	RequestId string           `json:"requestId"`
+}
+
+type UpgradeLockInfo struct {
+	Holder    string `json:"holder"`
+	Scope     string `json:"scope"`
+	ExpiresAt string `json:"expiresAt"`
+}
+
+type UpgradePanelInfo struct {
+	CurrentVersion  string `json:"currentVersion"`
+	LatestVersion   string `json:"latestVersion"`
+	UpdateAvailable bool   `json:"updateAvailable"`
+	Channel         string `json:"channel"`
+	ComposeMode     bool   `json:"composeMode"`
+}
+
+type UpgradePanelReq struct {
+	OperationId   string `json:"operationId"`
+	TargetVersion string `json:"targetVersion"`
+}
+
+type UpgradePendingData struct {
+	Items []UpgradePendingItem `json:"items"`
+}
+
+type UpgradePendingItem struct {
+	NodeId        string `json:"nodeId"`
+	NodeName      string `json:"nodeName"`
+	TargetVersion string `json:"targetVersion"`
+	BatchId       string `json:"batchId"`
+	CreatedAt     string `json:"createdAt"`
+	ExpiresAt     string `json:"expiresAt"`
+}
+
+type UpgradePendingResp struct {
+	Code      string             `json:"code"`
+	Message   string             `json:"message"`
+	Data      UpgradePendingData `json:"data"`
+	RequestId string             `json:"requestId"`
+}
+
+type UpgradeStatusData struct {
+	Panel         UpgradePanelInfo  `json:"panel"`
+	Compatibility CompatibilityInfo `json:"compatibility"`
+	Lock          *UpgradeLockInfo  `json:"lock,optional"`
+	ActiveTask    *UpgradeTask      `json:"activeTask,optional"`
+}
+
+type UpgradeStatusResp struct {
+	Code      string            `json:"code"`
+	Message   string            `json:"message"`
+	Data      UpgradeStatusData `json:"data"`
+	RequestId string            `json:"requestId"`
+}
+
+type UpgradeTask struct {
+	Id            string            `json:"id"`
+	Scope         string            `json:"scope"`
+	TargetVersion string            `json:"targetVersion"`
+	FromVersion   string            `json:"fromVersion"`
+	BatchId       string            `json:"batchId,optional"`
+	Status        string            `json:"status"`
+	ErrorCode     string            `json:"errorCode,optional"`
+	ErrorMessage  string            `json:"errorMessage,optional"`
+	CreatedBy     string            `json:"createdBy"`
+	RequestId     string            `json:"requestId"`
+	CreatedAt     string            `json:"createdAt"`
+	StartedAt     string            `json:"startedAt,optional"`
+	FinishedAt    string            `json:"finishedAt,optional"`
+	Nodes         []UpgradeTaskNode `json:"nodes,optional"`
+}
+
+type UpgradeTaskData struct {
+	Item UpgradeTask `json:"item"`
+}
+
+type UpgradeTaskDetailData struct {
+	Item UpgradeTask `json:"item"`
+}
+
+type UpgradeTaskDetailReq struct {
+	Id string `path:"id"`
+}
+
+type UpgradeTaskDetailResp struct {
+	Code      string                `json:"code"`
+	Message   string                `json:"message"`
+	Data      UpgradeTaskDetailData `json:"data"`
+	RequestId string                `json:"requestId"`
+}
+
+type UpgradeTaskListData struct {
+	Items    []UpgradeTask `json:"items"`
+	Total    int           `json:"total"`
+	Page     int           `json:"page"`
+	PageSize int           `json:"pageSize"`
+}
+
+type UpgradeTaskListReq struct {
+	Page     int    `form:"page,default=1"`
+	PageSize int    `form:"pageSize,default=20"`
+	Scope    string `form:"scope,optional"`
+	Status   string `form:"status,optional"`
+}
+
+type UpgradeTaskListResp struct {
+	Code      string              `json:"code"`
+	Message   string              `json:"message"`
+	Data      UpgradeTaskListData `json:"data"`
+	RequestId string              `json:"requestId"`
+}
+
+type UpgradeTaskNode struct {
+	NodeId       string `json:"nodeId"`
+	NodeName     string `json:"nodeName"`
+	FromVersion  string `json:"fromVersion"`
+	ToVersion    string `json:"toVersion"`
+	State        string `json:"state"`
+	ErrorCode    string `json:"errorCode,optional"`
+	ErrorMessage string `json:"errorMessage,optional"`
+	UpdatedAt    string `json:"updatedAt"`
+}
+
+type UpgradeTaskResp struct {
+	Code      string          `json:"code"`
+	Message   string          `json:"message"`
+	Data      UpgradeTaskData `json:"data"`
+	RequestId string          `json:"requestId"`
+}
+
+type UpgradeTaskRetryReq struct {
+	Id string `path:"id"`
+}
+
 type UserInfo struct {
 	Id          string `json:"id"`
 	Account     string `json:"account"`
 	DisplayName string `json:"displayName"`
+}
+
+type WsReq struct {
+	Resources     string `form:"resources,optional"`
+	SchemaVersion int    `form:"schemaVersion,default=1"`
 }

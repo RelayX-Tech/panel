@@ -24,6 +24,53 @@ type Config struct {
 
 	// STO-002 节点注册：RegistrationService gRPC 服务端 + Panel CA。
 	Registration RegistrationConf `json:"Registration,optional"`
+
+	// STO-004 部署形态与升级外挂（design.md §7.3）。
+	Deployment DeploymentConf `json:"Deployment,optional"`
+	Upgrader   UpgraderConf   `json:"Upgrader,optional"`
+
+	// STO-004 对外访问地址（订阅预览等使用）。
+	PublicURL string `json:",optional"`
+
+	// STO-004 Geo 文件目录。
+	Geo GeoConf `json:"Geo,optional"`
+
+	// STO-004 在线升级更新源。
+	Update UpdateConf `json:"Update,optional"`
+
+	// STO-004 订阅格式能力（来自 core 的 capabilities；为空时以 DB 为准）。
+	Subscription SubscriptionConf `json:"Subscription,optional"`
+}
+
+// SubscriptionConf 配置后端支持的订阅格式能力。
+type SubscriptionConf struct {
+	Capabilities []string `json:",optional"`
+}
+
+// UpdateConf 配置更新源与验签公钥（design.md §5.6）。
+type UpdateConf struct {
+	SourceURL  string   `json:",optional"`
+	Channel    string   `json:",default=stable"`
+	PublicKeys []string `json:",optional"`
+}
+
+// GeoConf 配置 Geo 文件存放与更新源。
+type GeoConf struct {
+	Dir             string `json:",default=/var/lib/relayx/geo"`
+	UpdateSourceURL string `json:",optional"`
+}
+
+// DeploymentConf 描述部署形态：binary（systemd）或 compose。
+type DeploymentConf struct {
+	Mode string `json:",default=binary"` // binary | compose
+}
+
+// UpgraderConf 配置 relayx-upgrader 本地 UDS 客户端。
+type UpgraderConf struct {
+	Enabled    bool          `json:",default=false"`
+	SocketPath string        `json:",default=/run/relayx/upgrader.sock"`
+	TokenFile  string        `json:",default=/etc/relayx/upgrader.token"`
+	Timeout    time.Duration `json:",default=30m"`
 }
 
 // RegistrationConf 配置 RegistrationService gRPC 监听与 Panel CA（design §3.10）。

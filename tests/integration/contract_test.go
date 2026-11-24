@@ -99,6 +99,77 @@ func TestSwaggerEnvelopeFieldsPresent(t *testing.T) {
 	}
 }
 
+// TestSwaggerHasAllSto004Paths 校验 design.md §3.4 的 54 个接口全部进入 OpenAPI 契约（BE-API-26）。
+func TestSwaggerHasAllSto004Paths(t *testing.T) {
+	root := projectRoot(t)
+	spec := readJSON(t, filepath.Join(root, "docs", "openapi", "panel.swagger.json"))
+	paths, _ := spec["paths"].(map[string]any)
+
+	want := map[string][]string{
+		"/api/v1/dashboard/summary":                  {"get"},
+		"/api/v1/dashboard/traffic":                  {"get"},
+		"/api/v1/monitoring/overview":                {"get"},
+		"/api/v1/nodes":                              {"get"},
+		"/api/v1/nodes/{id}":                         {"get"},
+		"/api/v1/nodes/{id}/metrics":                 {"get"},
+		"/api/v1/nodes/{id}/events":                  {"get"},
+		"/api/v1/nodes/{id}/probe":                   {"post"},
+		"/api/v1/alerts":                             {"get"},
+		"/api/v1/alerts/{id}":                        {"get"},
+		"/api/v1/traffic":                            {"get"},
+		"/api/v1/clients":                            {"get"},
+		"/api/v1/monitoring/tunnels":                 {"get"},
+		"/api/v1/settings/general":                   {"get"},
+		"/api/v1/settings/security":                  {"get"},
+		"/api/v1/settings/profile":                   {"patch"},
+		"/api/v1/auth/sessions":                      {"get"},
+		"/api/v1/auth/sessions/{id}":                 {"delete"},
+		"/api/v1/settings/probe":                     {"get", "put"},
+		"/api/v1/settings/probe/apply-status":        {"get"},
+		"/api/v1/settings/subscription-hosts":        {"get", "post"},
+		"/api/v1/settings/subscription-hosts/{id}":   {"patch", "delete"},
+		"/api/v1/settings/subscription/formats":      {"get", "put"},
+		"/api/v1/settings/subscription/preview":      {"get"},
+		"/api/v1/settings/notifications":             {"get", "post"},
+		"/api/v1/settings/notifications/{id}":        {"patch", "delete"},
+		"/api/v1/settings/notifications/{id}/test":   {"post"},
+		"/api/v1/settings/retention":                 {"get"},
+		"/api/v1/settings/retention/storage":         {"get"},
+		"/api/v1/settings/geo-files":                 {"get"},
+		"/api/v1/settings/geo-files/{id}/update":     {"post"},
+		"/api/v1/settings/geo-files/upload":          {"post"},
+		"/api/v1/settings/geo-files/{id}/categories": {"get"},
+		"/api/v1/settings/geo-files/{id}/entries":    {"get"},
+		"/api/v1/settings/geo-files/{id}/validate":   {"post"},
+		"/api/v1/audit-logs":                         {"get"},
+		"/api/v1/audit-logs/{id}":                    {"get"},
+		"/api/v1/system/info":                        {"get"},
+		"/api/v1/system/health":                      {"get"},
+		"/api/v1/upgrade/status":                     {"get"},
+		"/api/v1/upgrade/check":                      {"post"},
+		"/api/v1/upgrade/panel":                      {"post"},
+		"/api/v1/upgrade/agents":                     {"post"},
+		"/api/v1/upgrade/tasks":                      {"get"},
+		"/api/v1/upgrade/tasks/{id}":                 {"get"},
+		"/api/v1/upgrade/tasks/{id}/retry":           {"post"},
+		"/api/v1/upgrade/pending":                    {"get"},
+		"/api/v1/ws":                                 {"get"},
+	}
+
+	for path, methods := range want {
+		item, ok := paths[path].(map[string]any)
+		if !ok {
+			t.Errorf("swagger missing path %s", path)
+			continue
+		}
+		for _, method := range methods {
+			if _, ok := item[method]; !ok {
+				t.Errorf("swagger missing %s %s", method, path)
+			}
+		}
+	}
+}
+
 func TestSessionCookieNameContract(t *testing.T) {
 	c, err := config.Load(filepath.Join(projectRoot(t), "etc", "panel-api.yaml"))
 	if err != nil {

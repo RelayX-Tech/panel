@@ -93,6 +93,13 @@ jobs:
           go run . migrate up
           go run . migrate status
 
+      # OPS-2：迁移 down 路径门禁——回滚最近一次迁移后必须能再次 up。
+      - name: migrate down + up round-trip
+        run: |
+          go run . migrate down
+          go run . migrate up
+          go run . migrate status
+
       - name: unit tests
         run: go test ./internal/... ./cmd/... -count=1
 

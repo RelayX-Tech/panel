@@ -44,9 +44,15 @@ type TransactionRunner interface {
 }
 
 // ServiceContext 是组合根：配置、model、会话管理与中间件在启动时构造一次。
+// RedisPinger 是健康检查所需的最小 Redis 能力。
+type RedisPinger interface {
+	Ping() bool
+}
+
 type ServiceContext struct {
 	Config          config.Config
 	DB              sqlx.SqlConn
+	Redis           RedisPinger
 	Tx              TransactionRunner
 	UserModel       model.AuthUserModel
 	SessionModel    model.AuthSessionModel
@@ -108,6 +114,12 @@ func NewServiceContext(c config.Config, conn sqlx.SqlConn, cacheConf cache.Cache
 		)
 	}
 
+	// 健康检查（AC85）需要独立的 Redis 连通性探测。
+	var redisPinger RedisPinger
+	if len(cacheConf) > 0 {
+		redisPinger = cacheConf[0].RedisConf.NewRedis()
+	}
+
 	coreControl, agentClient := dialDispatchClients(c)
 
 	dispatchSvc, auditSink, box := buildDispatch(c, conn)
@@ -123,6 +135,7 @@ func NewServiceContext(c config.Config, conn sqlx.SqlConn, cacheConf cache.Cache
 	return &ServiceContext{
 		Config:             c,
 		DB:                 conn,
+		Redis:              redisPinger,
 		Tx:                 conn,
 		UserModel:          users,
 		SessionModel:       sessions,

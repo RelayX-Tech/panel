@@ -14,8 +14,10 @@ import (
 	"github.com/relayx-tech/panel/migrations"
 )
 
-// design.md §6.2 迁移清单（9 个文件，按版本升序）。
+// design.md §6.2 迁移清单（STO-004 新增，按版本升序）。
+// 依赖读模型迁移必须晚于既有数据库版本（202611221400），否则 goose 会判定 out-of-order。
 var sto004Migrations = []string{
+	"202611231190_create_sto002_read_dependencies.sql",
 	"202611231200_create_alerts.sql",
 	"202611231210_create_node_events.sql",
 	"202611231220_create_client_stats.sql",

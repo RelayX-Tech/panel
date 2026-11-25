@@ -216,9 +216,11 @@ type AlertTrend {
 type NodeHealthNode {
 	nodeId     string  `json:"nodeId"`
 	nodeName   string  `json:"nodeName"`
+	ip         string  `json:"ip"`
 	status     string  `json:"status"`
 	cpuPercent float64 `json:"cpuPercent"`
 	memPercent float64 `json:"memPercent"`
+	xrayState  string  `json:"xrayState"`
 }
 
 type NodeHealthGroup {

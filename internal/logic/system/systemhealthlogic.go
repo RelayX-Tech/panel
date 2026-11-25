@@ -33,18 +33,41 @@ func NewSystemHealthLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Syst
 }
 
 func (l *SystemHealthLogic) SystemHealth() (resp *types.SystemHealthResp, err error) {
-	items := make([]types.HealthItem, 0, 4)
-
-	items = append(items, l.databaseItem())
-	items = append(items, l.coreControlItem())
-	items = append(items, l.agentItem())
-	items = append(items, l.registrationItem())
+	database := l.databaseItem()
+	redis := l.redisItem()
+	items := []types.HealthItem{
+		{Key: "healthz", Status: "ok", Detail: "ok"},
+		readyzItem(database, redis),
+		database,
+		redis,
+		l.coreControlItem(),
+		l.registrationItem(),
+		l.agentItem(),
+	}
 
 	return &types.SystemHealthResp{
 		Code:      errcode.OK,
 		Data:      types.SystemHealthData{Items: items, CheckedAt: shared.TimeString(time.Now().UTC())},
 		RequestId: requestid.FromContext(l.ctx),
 	}, nil
+}
+
+// readyzItem 汇总就绪状态：数据库与 Redis 均可用才算就绪（AC85）。
+func readyzItem(database, redis types.HealthItem) types.HealthItem {
+	if database.Status == "ok" && redis.Status == "ok" {
+		return types.HealthItem{Key: "readyz", Status: "ok", Detail: "dependencies ready"}
+	}
+	return types.HealthItem{Key: "readyz", Status: "degraded", Detail: "dependency unavailable"}
+}
+
+func (l *SystemHealthLogic) redisItem() types.HealthItem {
+	if l.svcCtx.Redis == nil {
+		return types.HealthItem{Key: "redis", Status: "disabled", Detail: "not configured"}
+	}
+	if !l.svcCtx.Redis.Ping() {
+		return types.HealthItem{Key: "redis", Status: "error", Detail: "redis unreachable"}
+	}
+	return types.HealthItem{Key: "redis", Status: "ok", Detail: "redis reachable"}
 }
 
 func (l *SystemHealthLogic) databaseItem() types.HealthItem {

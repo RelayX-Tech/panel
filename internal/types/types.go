@@ -519,9 +519,11 @@ type NodeHealthGroup struct {
 type NodeHealthNode struct {
 	NodeId     string  `json:"nodeId"`
 	NodeName   string  `json:"nodeName"`
+	Ip         string  `json:"ip"`
 	Status     string  `json:"status"`
 	CpuPercent float64 `json:"cpuPercent"`
 	MemPercent float64 `json:"memPercent"`
+	XrayState  string  `json:"xrayState"`
 }
 
 type NodeListData struct {

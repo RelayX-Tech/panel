@@ -13,12 +13,13 @@ import (
 )
 
 var (
-	ErrLockBusy            = errors.New("another upgrade is in progress")
-	ErrComposeManual       = errors.New("docker compose deployment requires manual rebuild")
-	ErrUpgraderUnavailable = errors.New("upgrader is unavailable")
-	ErrAgentUnavailable    = errors.New("agent is unavailable")
-	ErrLockLost            = errors.New("upgrade lock lost")
-	ErrTaskNotRetryable    = errors.New("task is not retryable")
+	ErrLockBusy                  = errors.New("another upgrade is in progress")
+	ErrComposeManual             = errors.New("docker compose deployment requires manual rebuild")
+	ErrUpgraderUnavailable       = errors.New("upgrader is unavailable")
+	ErrAgentUnavailable          = errors.New("agent is unavailable")
+	ErrLockLost                  = errors.New("upgrade lock lost")
+	ErrTaskNotRetryable          = errors.New("task is not retryable")
+	ErrUpdateSourceNotConfigured = errors.New("update source is not configured")
 )
 
 const (
@@ -204,9 +205,10 @@ type CheckResult struct {
 }
 
 // Check 拉取更新清单；失败时保留上次结果。
+// 未配置 Update.SourceURL 时返回 ErrUpdateSourceNotConfigured（不是故障）。
 func (s *Service) Check(ctx context.Context) (*CheckResult, error) {
 	if s.Source == nil {
-		return nil, ErrUpgraderUnavailable
+		return &CheckResult{CheckedAt: s.now(), LatestVersion: s.Version()}, ErrUpdateSourceNotConfigured
 	}
 	manifest, err := s.Source.Fetch(ctx, s.Channel)
 	if err != nil {
@@ -222,6 +224,9 @@ func (s *Service) Check(ctx context.Context) (*CheckResult, error) {
 	}
 	return &CheckResult{CheckedAt: s.now(), LatestVersion: manifest.Version, UpdateAvailable: available}, nil
 }
+
+// SourceConfigured 表示是否配置了更新源（决定是否启动周期检查）。
+func (s *Service) SourceConfigured() bool { return s.Source != nil }
 
 // StartPanel 发起 Panel 自升级；返回 queued 任务（由 upgrader 异步执行）。
 func (s *Service) StartPanel(ctx context.Context, actor, requestID, operationID, target string) (*model.UpgradeTask, error) {

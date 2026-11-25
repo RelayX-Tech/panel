@@ -13,6 +13,7 @@ import (
 
 type fakeNodeModel struct {
 	model.NodeModel
+	groups []model.NodeHealthGroup
 }
 
 func (f fakeNodeModel) CountsByTypeStatus(context.Context, time.Time) (int64, int64, int64, int64, error) {
@@ -20,7 +21,7 @@ func (f fakeNodeModel) CountsByTypeStatus(context.Context, time.Time) (int64, in
 }
 func (f fakeNodeModel) XrayAbnormal(context.Context) (int64, error) { return 0, nil }
 func (f fakeNodeModel) GroupNodes(context.Context) ([]model.NodeHealthGroup, error) {
-	return nil, nil
+	return f.groups, nil
 }
 
 type fakeAlertModel struct{ model.AlertModel }
@@ -47,6 +48,32 @@ func (f fakeTrafficModel) Totals(context.Context, time.Time, time.Time) (int64, 
 }
 func (f fakeTrafficModel) Rows(context.Context, string, time.Time, time.Time, int, int, string) ([]model.TrafficRow, int64, error) {
 	return nil, 0, nil
+}
+
+func TestMonitoringOverviewNodeHealthIncludesIPAndXray(t *testing.T) {
+	svcCtx := &svc.ServiceContext{
+		NodeModel: fakeNodeModel{groups: []model.NodeHealthGroup{{
+			GroupType: "entry", GroupID: "eg-hk", GroupName: "Hong Kong Ingress",
+			Nodes: []model.NodeHealthNode{{
+				NodeID: "node-hk-1", NodeName: "hk-edge-01", IP: "203.0.113.10",
+				Status: "online", CPUPercent: 21.4, MemPercent: 48.2, XrayState: "running",
+			}},
+		}}},
+		AlertModel: fakeAlertModel{}, ClientModel: fakeClientModel{}, TrafficModel: fakeTrafficModel{},
+	}
+	l := monitoring.NewMonitoringOverviewLogic(context.Background(), svcCtx)
+	resp, err := l.MonitoringOverview(&types.MonitoringOverviewReq{TimeRange: "24h"})
+	if err != nil {
+		t.Fatalf("overview: %v", err)
+	}
+	nodes := resp.Data.NodeHealth[0].Nodes
+	if len(nodes) != 1 {
+		t.Fatalf("nodes = %d, want 1", len(nodes))
+	}
+	if nodes[0].Ip != "203.0.113.10" || nodes[0].XrayState != "running" ||
+		nodes[0].NodeId != "node-hk-1" || nodes[0].NodeName != "hk-edge-01" {
+		t.Fatalf("unexpected node health: %+v", nodes[0])
+	}
 }
 
 func TestMonitoringOverviewEmpty(t *testing.T) {

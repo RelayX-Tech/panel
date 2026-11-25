@@ -145,9 +145,11 @@ type StatusCount struct {
 type NodeHealthNode struct {
 	NodeID     string
 	NodeName   string
+	IP         string
 	Status     string
 	CPUPercent float64
 	MemPercent float64
+	XrayState  string
 }
 
 type NodeHealthGroup struct {

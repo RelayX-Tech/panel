@@ -240,7 +240,7 @@ FROM nodes`
 
 // GroupNodes 按组返回节点健康；用于监控总览。
 func (m *PostgresNodeModel) GroupNodes(ctx context.Context) ([]NodeHealthGroup, error) {
-	const query = `SELECT n.type, n.group_id, coalesce(eg.name, tg.name, ''), n.id, n.name, n.status, n.cpu_percent, n.mem_percent
+	const query = `SELECT n.type, n.group_id, coalesce(eg.name, tg.name, ''), n.id, n.name, n.ip, n.status, n.cpu_percent, n.mem_percent, n.xray_state
 FROM nodes n
 LEFT JOIN entry_groups eg ON n.type = 'entry' AND eg.id = n.group_id
 LEFT JOIN tunnel_groups tg ON n.type = 'tunnel' AND tg.id = n.group_id
@@ -251,9 +251,11 @@ ORDER BY n.type, n.group_id, n.name`
 		GroupName  string  `db:"group_name"`
 		Id         string  `db:"id"`
 		Name       string  `db:"name"`
+		Ip         string  `db:"ip"`
 		Status     string  `db:"status"`
 		CpuPercent float64 `db:"cpu_percent"`
 		MemPercent float64 `db:"mem_percent"`
+		XrayState  string  `db:"xray_state"`
 	}
 	var rows []row
 	if err := m.conn.QueryRowsCtx(ctx, &rows, query); err != nil {
@@ -270,7 +272,8 @@ ORDER BY n.type, n.group_id, n.name`
 			out = append(out, NodeHealthGroup{GroupType: r.Type, GroupID: r.GroupId, GroupName: r.GroupName})
 		}
 		out[idx].Nodes = append(out[idx].Nodes, NodeHealthNode{
-			NodeID: r.Id, NodeName: r.Name, Status: r.Status, CPUPercent: r.CpuPercent, MemPercent: r.MemPercent,
+			NodeID: r.Id, NodeName: r.Name, IP: r.Ip, Status: r.Status,
+			CPUPercent: r.CpuPercent, MemPercent: r.MemPercent, XrayState: r.XrayState,
 		})
 	}
 	return out, nil

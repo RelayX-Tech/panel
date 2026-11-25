@@ -131,8 +131,8 @@ func toHealthGroups(in []model.NodeHealthGroup) []types.NodeHealthGroup {
 		nodes := make([]types.NodeHealthNode, 0, len(g.Nodes))
 		for _, n := range g.Nodes {
 			nodes = append(nodes, types.NodeHealthNode{
-				NodeId: n.NodeID, NodeName: n.NodeName, Status: n.Status,
-				CpuPercent: n.CPUPercent, MemPercent: n.MemPercent,
+				NodeId: n.NodeID, NodeName: n.NodeName, Ip: n.IP, Status: n.Status,
+				CpuPercent: n.CPUPercent, MemPercent: n.MemPercent, XrayState: n.XrayState,
 			})
 		}
 		out = append(out, types.NodeHealthGroup{

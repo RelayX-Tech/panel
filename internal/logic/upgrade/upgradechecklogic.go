@@ -5,6 +5,7 @@ package upgrade
 
 import (
 	"context"
+	"errors"
 
 	"github.com/zeromicro/go-zero/core/logx"
 
@@ -13,6 +14,7 @@ import (
 	"github.com/relayx-tech/panel/internal/requestid"
 	"github.com/relayx-tech/panel/internal/svc"
 	"github.com/relayx-tech/panel/internal/types"
+	"github.com/relayx-tech/panel/internal/upgrade"
 )
 
 type UpgradeCheckLogic struct {
@@ -43,9 +45,11 @@ func (l *UpgradeCheckLogic) UpgradeCheck() (resp *types.UpgradeCheckResp, err er
 		data.UpdateAvailable = result.UpdateAvailable
 	}
 	if checkErr != nil {
-		// 检查失败保留上次结果并给出错误码，不阻塞页面。
-		data.ErrorCode = errcode.UPSTREAM_UPDATE_SOURCE_FAILED
-		l.Errorw("upgrade.check.failure", logx.Field("error", checkErr.Error()))
+		if !errors.Is(checkErr, upgrade.ErrUpdateSourceNotConfigured) {
+			// 已配置但检查失败：保留上次结果并给出错误码；未配置不视为故障。
+			data.ErrorCode = errcode.UPSTREAM_UPDATE_SOURCE_FAILED
+			l.Errorw("upgrade.check.failure", logx.Field("error", checkErr.Error()))
+		}
 	}
 	return &types.UpgradeCheckResp{
 		Code:      errcode.OK,

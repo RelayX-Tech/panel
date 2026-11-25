@@ -79,7 +79,8 @@ func main() {
 		logx.Info("please unset RELAYX_ADMIN_PASSWORD after first startup")
 	}
 	if res.Warning != "" {
-		logx.Errorw("admin bootstrap warning", logx.Field("warning", res.Warning))
+		// 未设置引导环境变量属于预期跳过，不是故障，按 info 记录。
+		logx.Infow("admin bootstrap skipped", logx.Field("reason", res.Warning))
 	}
 
 	response.InstallErrorHandler()
@@ -282,7 +283,7 @@ func startUpgradeReconciler(svcCtx *svc.ServiceContext) {
 
 // startUpgradeChecker 启动后异步检查一次更新，此后每 6 小时检查（AC98）。
 func startUpgradeChecker(svcCtx *svc.ServiceContext) {
-	if svcCtx.Upgrade == nil {
+	if svcCtx.Upgrade == nil || !svcCtx.Upgrade.SourceConfigured() {
 		return
 	}
 	stop := make(chan struct{})

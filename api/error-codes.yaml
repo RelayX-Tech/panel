@@ -392,3 +392,219 @@
   deprecated: false
   message: "证书签发失败"
   messageEn: "Certificate issuance failed"
+- code: AUTH_FORBIDDEN
+  http: 403
+  i18n: errors.AUTH_FORBIDDEN
+  owner: backend-panel
+  since: "2026-11-24"
+  deprecated: false
+  message: "当前角色无权限"
+  messageEn: "Forbidden for current role"
+- code: FORBIDDEN_SELF_SESSION_REVOKE
+  http: 403
+  i18n: errors.FORBIDDEN_SELF_SESSION_REVOKE
+  owner: backend-panel
+  since: "2026-11-24"
+  deprecated: false
+  message: "不允许吊销当前会话"
+  messageEn: "Cannot revoke the current session"
+- code: NOT_FOUND_ALERT
+  http: 404
+  i18n: errors.NOT_FOUND_ALERT
+  owner: backend-panel
+  since: "2026-11-24"
+  deprecated: false
+  message: "告警不存在"
+  messageEn: "Alert not found"
+- code: NOT_FOUND_SESSION
+  http: 404
+  i18n: errors.NOT_FOUND_SESSION
+  owner: backend-panel
+  since: "2026-11-24"
+  deprecated: false
+  message: "会话不存在"
+  messageEn: "Session not found"
+- code: NOT_FOUND_SUBSCRIPTION_HOST
+  http: 404
+  i18n: errors.NOT_FOUND_SUBSCRIPTION_HOST
+  owner: backend-panel
+  since: "2026-11-24"
+  deprecated: false
+  message: "订阅域名不存在"
+  messageEn: "Subscription host not found"
+- code: NOT_FOUND_NOTIFICATION
+  http: 404
+  i18n: errors.NOT_FOUND_NOTIFICATION
+  owner: backend-panel
+  since: "2026-11-24"
+  deprecated: false
+  message: "通知渠道不存在"
+  messageEn: "Notification channel not found"
+- code: NOT_FOUND_GEO_FILE
+  http: 404
+  i18n: errors.NOT_FOUND_GEO_FILE
+  owner: backend-panel
+  since: "2026-11-24"
+  deprecated: false
+  message: "Geo 文件不存在"
+  messageEn: "Geo file not found"
+- code: NOT_FOUND_AUDIT_LOG
+  http: 404
+  i18n: errors.NOT_FOUND_AUDIT_LOG
+  owner: backend-panel
+  since: "2026-11-24"
+  deprecated: false
+  message: "审计记录不存在"
+  messageEn: "Audit log not found"
+- code: NOT_FOUND_UPGRADE_TASK
+  http: 404
+  i18n: errors.NOT_FOUND_UPGRADE_TASK
+  owner: backend-panel
+  since: "2026-11-24"
+  deprecated: false
+  message: "升级任务不存在"
+  messageEn: "Upgrade task not found"
+- code: NOT_FOUND_ENTRY_GROUP
+  http: 404
+  i18n: errors.NOT_FOUND_ENTRY_GROUP
+  owner: backend-panel
+  since: "2026-11-24"
+  deprecated: false
+  message: "入口组不存在"
+  messageEn: "Entry group not found"
+- code: CONFLICT_SUBSCRIPTION_HOST_EXISTS
+  http: 409
+  i18n: errors.CONFLICT_SUBSCRIPTION_HOST_EXISTS
+  owner: backend-panel
+  since: "2026-11-24"
+  deprecated: false
+  message: "订阅域名已存在"
+  messageEn: "Subscription host already exists"
+- code: CONFLICT_CAPABILITY_MISSING
+  http: 409
+  i18n: errors.CONFLICT_CAPABILITY_MISSING
+  owner: backend-panel
+  since: "2026-11-24"
+  deprecated: false
+  message: "后端能力不支持该格式"
+  messageEn: "Backend capability does not support this format"
+- code: CONFLICT_NODE_UPGRADING
+  http: 409
+  i18n: errors.CONFLICT_NODE_UPGRADING
+  owner: backend-panel
+  since: "2026-11-24"
+  deprecated: false
+  message: "目标节点正在升级，暂停下发"
+  messageEn: "Target node is upgrading; dispatch paused"
+- code: CONFLICT_UPGRADE_TARGET_INVALID
+  http: 409
+  i18n: errors.CONFLICT_UPGRADE_TARGET_INVALID
+  owner: backend-panel
+  since: "2026-11-24"
+  deprecated: false
+  message: "目标版本或目标节点不满足升级前置"
+  messageEn: "Upgrade target is not eligible"
+- code: CONFLICT_COMPOSE_MANUAL_REQUIRED
+  http: 409
+  i18n: errors.CONFLICT_COMPOSE_MANUAL_REQUIRED
+  owner: backend-panel
+  since: "2026-11-24"
+  deprecated: false
+  message: "Compose 部署需人工重建容器"
+  messageEn: "Compose deployment requires manual container rebuild"
+- code: VALIDATION_INVALID_RANGE
+  http: 400
+  i18n: errors.VALIDATION_INVALID_RANGE
+  owner: backend-panel
+  since: "2026-11-24"
+  deprecated: false
+  message: "时间范围非法"
+  messageEn: "Invalid time range"
+- code: VALIDATION_INVALID_SORT
+  http: 400
+  i18n: errors.VALIDATION_INVALID_SORT
+  owner: backend-panel
+  since: "2026-11-24"
+  deprecated: false
+  message: "排序字段不在白名单"
+  messageEn: "Sort field is not allowed"
+- code: VALIDATION_UNSUPPORTED_FORMAT
+  http: 400
+  i18n: errors.VALIDATION_UNSUPPORTED_FORMAT
+  owner: backend-panel
+  since: "2026-11-24"
+  deprecated: false
+  message: "订阅格式不支持"
+  messageEn: "Unsupported subscription format"
+- code: VALIDATION_INVALID_FILE_TYPE
+  http: 400
+  i18n: errors.VALIDATION_INVALID_FILE_TYPE
+  owner: backend-panel
+  since: "2026-11-24"
+  deprecated: false
+  message: "上传文件类型不允许"
+  messageEn: "Uploaded file type is not allowed"
+- code: VALIDATION_FILE_TOO_LARGE
+  http: 400
+  i18n: errors.VALIDATION_FILE_TOO_LARGE
+  owner: backend-panel
+  since: "2026-11-24"
+  deprecated: false
+  message: "上传文件超过大小上限"
+  messageEn: "Uploaded file exceeds the size limit"
+- code: VALIDATION_UPDATE_SOURCE_INVALID
+  http: 400
+  i18n: errors.VALIDATION_UPDATE_SOURCE_INVALID
+  owner: backend-panel
+  since: "2026-11-24"
+  deprecated: false
+  message: "更新源 URL 或通道非法"
+  messageEn: "Invalid update source URL or channel"
+- code: GEO_PARSE_FAILED
+  http: 400
+  i18n: errors.GEO_PARSE_FAILED
+  owner: backend-panel
+  since: "2026-11-24"
+  deprecated: false
+  message: "Geo 文件解析或校验失败"
+  messageEn: "Geo file parse or validation failed"
+- code: UPSTREAM_AGENT_UNAVAILABLE
+  http: 502
+  i18n: errors.UPSTREAM_AGENT_UNAVAILABLE
+  owner: backend-panel
+  since: "2026-11-24"
+  deprecated: false
+  message: "Agent 不可达"
+  messageEn: "Agent is unreachable"
+- code: UPSTREAM_NOTIFICATION_FAILED
+  http: 502
+  i18n: errors.UPSTREAM_NOTIFICATION_FAILED
+  owner: backend-panel
+  since: "2026-11-24"
+  deprecated: false
+  message: "通知渠道发送失败"
+  messageEn: "Notification delivery failed"
+- code: UPSTREAM_UPDATE_SOURCE_FAILED
+  http: 502
+  i18n: errors.UPSTREAM_UPDATE_SOURCE_FAILED
+  owner: backend-panel
+  since: "2026-11-24"
+  deprecated: false
+  message: "更新源不可达或清单非法"
+  messageEn: "Update source is unreachable or manifest is invalid"
+- code: UPSTREAM_SIGNATURE_INVALID
+  http: 502
+  i18n: errors.UPSTREAM_SIGNATURE_INVALID
+  owner: backend-panel
+  since: "2026-11-24"
+  deprecated: false
+  message: "manifest 或资产签名校验失败"
+  messageEn: "Manifest or asset signature verification failed"
+- code: UPSTREAM_UPGRADER_UNAVAILABLE
+  http: 503
+  i18n: errors.UPSTREAM_UPGRADER_UNAVAILABLE
+  owner: backend-panel
+  since: "2026-11-24"
+  deprecated: false
+  message: "upgrader 不可达"
+  messageEn: "Upgrader is unreachable"

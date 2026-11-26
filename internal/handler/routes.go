@@ -6,13 +6,66 @@ package handler
 import (
 	"net/http"
 
+	alerts "github.com/relayx-tech/panel/internal/handler/alerts"
+	audit "github.com/relayx-tech/panel/internal/handler/audit"
 	auth "github.com/relayx-tech/panel/internal/handler/auth"
+	clients "github.com/relayx-tech/panel/internal/handler/clients"
+	dashboard "github.com/relayx-tech/panel/internal/handler/dashboard"
+	monitoring "github.com/relayx-tech/panel/internal/handler/monitoring"
+	nodes "github.com/relayx-tech/panel/internal/handler/nodes"
+	settings "github.com/relayx-tech/panel/internal/handler/settings"
+	system "github.com/relayx-tech/panel/internal/handler/system"
+	traffic "github.com/relayx-tech/panel/internal/handler/traffic"
+	upgrade "github.com/relayx-tech/panel/internal/handler/upgrade"
+	ws "github.com/relayx-tech/panel/internal/handler/ws"
 	"github.com/relayx-tech/panel/internal/svc"
 
 	"github.com/zeromicro/go-zero/rest"
 )
 
 func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Auth},
+			[]rest.Route{
+				{
+					// 告警列表
+					Method:  http.MethodGet,
+					Path:    "/alerts",
+					Handler: alerts.AlertListHandler(serverCtx),
+				},
+				{
+					// 告警详情
+					Method:  http.MethodGet,
+					Path:    "/alerts/:id",
+					Handler: alerts.AlertDetailHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Auth},
+			[]rest.Route{
+				{
+					// 审计列表
+					Method:  http.MethodGet,
+					Path:    "/audit-logs",
+					Handler: audit.AuditLogListHandler(serverCtx),
+				},
+				{
+					// 审计详情
+					Method:  http.MethodGet,
+					Path:    "/audit-logs/:id",
+					Handler: audit.AuditLogDetailHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+
 	server.AddRoutes(
 		rest.WithMiddlewares(
 			[]rest.Middleware{serverCtx.OriginCheck, serverCtx.LoginRateLimit},
@@ -62,5 +115,431 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			}...,
 		),
 		rest.WithPrefix("/api/v1/auth"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Auth},
+			[]rest.Route{
+				{
+					// 活跃会话
+					Method:  http.MethodGet,
+					Path:    "/sessions",
+					Handler: auth.SessionListHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/api/v1/auth"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.OriginCheck, serverCtx.Auth},
+			[]rest.Route{
+				{
+					// 吊销其他会话
+					Method:  http.MethodDelete,
+					Path:    "/sessions/:id",
+					Handler: auth.SessionRevokeHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/api/v1/auth"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Auth},
+			[]rest.Route{
+				{
+					// 客户端统计
+					Method:  http.MethodGet,
+					Path:    "/clients",
+					Handler: clients.ClientListHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Auth},
+			[]rest.Route{
+				{
+					// 控制台指标卡与横幅
+					Method:  http.MethodGet,
+					Path:    "/dashboard/summary",
+					Handler: dashboard.DashboardSummaryHandler(serverCtx),
+				},
+				{
+					// 控制台流量趋势
+					Method:  http.MethodGet,
+					Path:    "/dashboard/traffic",
+					Handler: dashboard.DashboardTrafficHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Auth},
+			[]rest.Route{
+				{
+					// 监控总览
+					Method:  http.MethodGet,
+					Path:    "/monitoring/overview",
+					Handler: monitoring.MonitoringOverviewHandler(serverCtx),
+				},
+				{
+					// 隧道链路
+					Method:  http.MethodGet,
+					Path:    "/monitoring/tunnels",
+					Handler: monitoring.MonitoringTunnelsHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Auth},
+			[]rest.Route{
+				{
+					// 节点列表
+					Method:  http.MethodGet,
+					Path:    "/nodes",
+					Handler: nodes.NodeListHandler(serverCtx),
+				},
+				{
+					// 节点详情头部
+					Method:  http.MethodGet,
+					Path:    "/nodes/:id",
+					Handler: nodes.NodeDetailHandler(serverCtx),
+				},
+				{
+					// 节点事件（30 天）
+					Method:  http.MethodGet,
+					Path:    "/nodes/:id/events",
+					Handler: nodes.NodeEventsHandler(serverCtx),
+				},
+				{
+					// 节点资源与内核序列
+					Method:  http.MethodGet,
+					Path:    "/nodes/:id/metrics",
+					Handler: nodes.NodeMetricsHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.OriginCheck, serverCtx.Auth},
+			[]rest.Route{
+				{
+					// 立即拨测
+					Method:  http.MethodPost,
+					Path:    "/nodes/:id/probe",
+					Handler: nodes.NodeProbeHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Auth},
+			[]rest.Route{
+				{
+					// 常规设置（只读）
+					Method:  http.MethodGet,
+					Path:    "/general",
+					Handler: settings.GeneralSettingsHandler(serverCtx),
+				},
+				{
+					// Geo 文件列表
+					Method:  http.MethodGet,
+					Path:    "/geo-files",
+					Handler: settings.GeoFileListHandler(serverCtx),
+				},
+				{
+					// Geo 分类浏览
+					Method:  http.MethodGet,
+					Path:    "/geo-files/:id/categories",
+					Handler: settings.GeoCategoryListHandler(serverCtx),
+				},
+				{
+					// Geo 条目查询
+					Method:  http.MethodGet,
+					Path:    "/geo-files/:id/entries",
+					Handler: settings.GeoEntryListHandler(serverCtx),
+				},
+				{
+					// 通知渠道列表
+					Method:  http.MethodGet,
+					Path:    "/notifications",
+					Handler: settings.NotificationListHandler(serverCtx),
+				},
+				{
+					// 探测规格
+					Method:  http.MethodGet,
+					Path:    "/probe",
+					Handler: settings.ProbeSettingsHandler(serverCtx),
+				},
+				{
+					// 探测规格下发进度
+					Method:  http.MethodGet,
+					Path:    "/probe/apply-status",
+					Handler: settings.ProbeApplyStatusHandler(serverCtx),
+				},
+				{
+					// 保留策略（只读）
+					Method:  http.MethodGet,
+					Path:    "/retention",
+					Handler: settings.RetentionSettingsHandler(serverCtx),
+				},
+				{
+					// 存储用量
+					Method:  http.MethodGet,
+					Path:    "/retention/storage",
+					Handler: settings.RetentionStorageHandler(serverCtx),
+				},
+				{
+					// 安全策略（只读）
+					Method:  http.MethodGet,
+					Path:    "/security",
+					Handler: settings.SecuritySettingsHandler(serverCtx),
+				},
+				{
+					// 订阅域名映射列表
+					Method:  http.MethodGet,
+					Path:    "/subscription-hosts",
+					Handler: settings.SubscriptionHostListHandler(serverCtx),
+				},
+				{
+					// 订阅格式开关
+					Method:  http.MethodGet,
+					Path:    "/subscription/formats",
+					Handler: settings.SubscriptionFormatsHandler(serverCtx),
+				},
+				{
+					// 订阅 URL 预览
+					Method:  http.MethodGet,
+					Path:    "/subscription/preview",
+					Handler: settings.SubscriptionPreviewHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/api/v1/settings"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.OriginCheck, serverCtx.Auth},
+			[]rest.Route{
+				{
+					// 检查并更新 Geo 文件
+					Method:  http.MethodPost,
+					Path:    "/geo-files/:id/update",
+					Handler: settings.GeoFileUpdateHandler(serverCtx),
+				},
+				{
+					// 校验 Geo 文件
+					Method:  http.MethodPost,
+					Path:    "/geo-files/:id/validate",
+					Handler: settings.GeoFileValidateHandler(serverCtx),
+				},
+				{
+					// 上传自定义 Geo 文件（multipart/form-data）
+					Method:  http.MethodPost,
+					Path:    "/geo-files/upload",
+					Handler: settings.GeoFileUploadHandler(serverCtx),
+				},
+				{
+					// 新增通知渠道
+					Method:  http.MethodPost,
+					Path:    "/notifications",
+					Handler: settings.NotificationCreateHandler(serverCtx),
+				},
+				{
+					// 编辑通知渠道
+					Method:  http.MethodPatch,
+					Path:    "/notifications/:id",
+					Handler: settings.NotificationUpdateHandler(serverCtx),
+				},
+				{
+					// 删除通知渠道
+					Method:  http.MethodDelete,
+					Path:    "/notifications/:id",
+					Handler: settings.NotificationDeleteHandler(serverCtx),
+				},
+				{
+					// 发送测试通知
+					Method:  http.MethodPost,
+					Path:    "/notifications/:id/test",
+					Handler: settings.NotificationTestHandler(serverCtx),
+				},
+				{
+					// 保存探测规格并触发下发
+					Method:  http.MethodPut,
+					Path:    "/probe",
+					Handler: settings.ProbeSettingsUpdateHandler(serverCtx),
+				},
+				{
+					// 更新显示名
+					Method:  http.MethodPatch,
+					Path:    "/profile",
+					Handler: settings.ProfileUpdateHandler(serverCtx),
+				},
+				{
+					// 新增订阅域名
+					Method:  http.MethodPost,
+					Path:    "/subscription-hosts",
+					Handler: settings.SubscriptionHostCreateHandler(serverCtx),
+				},
+				{
+					// 编辑订阅域名
+					Method:  http.MethodPatch,
+					Path:    "/subscription-hosts/:id",
+					Handler: settings.SubscriptionHostUpdateHandler(serverCtx),
+				},
+				{
+					// 删除订阅域名（幂等）
+					Method:  http.MethodDelete,
+					Path:    "/subscription-hosts/:id",
+					Handler: settings.SubscriptionHostDeleteHandler(serverCtx),
+				},
+				{
+					// 保存订阅格式开关
+					Method:  http.MethodPut,
+					Path:    "/subscription/formats",
+					Handler: settings.SubscriptionFormatsUpdateHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/api/v1/settings"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Auth},
+			[]rest.Route{
+				{
+					// 健康检查
+					Method:  http.MethodGet,
+					Path:    "/system/health",
+					Handler: system.SystemHealthHandler(serverCtx),
+				},
+				{
+					// 版本与兼容信息
+					Method:  http.MethodGet,
+					Path:    "/system/info",
+					Handler: system.SystemInfoHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Auth},
+			[]rest.Route{
+				{
+					// 流量分组表
+					Method:  http.MethodGet,
+					Path:    "/traffic",
+					Handler: traffic.TrafficListHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Auth},
+			[]rest.Route{
+				{
+					// 待升级清单
+					Method:  http.MethodGet,
+					Path:    "/upgrade/pending",
+					Handler: upgrade.UpgradePendingHandler(serverCtx),
+				},
+				{
+					// 升级状态与锁
+					Method:  http.MethodGet,
+					Path:    "/upgrade/status",
+					Handler: upgrade.UpgradeStatusHandler(serverCtx),
+				},
+				{
+					// 升级历史
+					Method:  http.MethodGet,
+					Path:    "/upgrade/tasks",
+					Handler: upgrade.UpgradeTaskListHandler(serverCtx),
+				},
+				{
+					// 任务详情
+					Method:  http.MethodGet,
+					Path:    "/upgrade/tasks/:id",
+					Handler: upgrade.UpgradeTaskDetailHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.OriginCheck, serverCtx.Auth},
+			[]rest.Route{
+				{
+					// 发起 Agent 单节点或批次升级
+					Method:  http.MethodPost,
+					Path:    "/upgrade/agents",
+					Handler: upgrade.UpgradeAgentsHandler(serverCtx),
+				},
+				{
+					// 手动检查更新
+					Method:  http.MethodPost,
+					Path:    "/upgrade/check",
+					Handler: upgrade.UpgradeCheckHandler(serverCtx),
+				},
+				{
+					// 发起 Panel 升级
+					Method:  http.MethodPost,
+					Path:    "/upgrade/panel",
+					Handler: upgrade.UpgradePanelHandler(serverCtx),
+				},
+				{
+					// 手动重试失败任务
+					Method:  http.MethodPost,
+					Path:    "/upgrade/tasks/:id/retry",
+					Handler: upgrade.UpgradeTaskRetryHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Auth},
+			[]rest.Route{
+				{
+					// WebSocket 实时通道
+					Method:  http.MethodGet,
+					Path:    "/ws",
+					Handler: ws.WsHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/api/v1"),
 	)
 }

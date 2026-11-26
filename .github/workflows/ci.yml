@@ -82,6 +82,14 @@ jobs:
       - name: go vet
         run: go vet ./...
 
+      # BE-14：golangci-lint 由 CI 的 Go（go.mod 的 1.27.x）源码构建，
+      # 避免旧版本二进制无法加载更高 Go 目标而失败。版本固定以保证可复现。
+      - name: golangci-lint
+        run: |
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+          go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.15.0
+          golangci-lint run
+
       - name: build
         run: go build ./...
 
@@ -93,8 +101,21 @@ jobs:
           go run . migrate up
           go run . migrate status
 
+      # OPS-2：迁移 down 路径门禁——回滚最近一次迁移后必须能再次 up。
+      - name: migrate down + up round-trip
+        run: |
+          go run . migrate down
+          go run . migrate up
+          go run . migrate status
+
       - name: unit tests
         run: go test ./internal/... ./cmd/... -count=1
+
+      # BE-13：覆盖率门禁（棘轮基线，按包阈值；goctl 生成的 handler 与 testsupport 排除）。
+      - name: coverage gate
+        run: |
+          go test ./internal/... -coverprofile coverage.out -count=1
+          go run ./cmd/coveragegate -profile coverage.out -thresholds coverage-thresholds.yml
 
       # 集成测试要求 PostgreSQL + Redis；连接不上时 testsupport 会 Skip，
       # 因此 service health 是这组用例真实执行的前提。

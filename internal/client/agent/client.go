@@ -71,3 +71,8 @@ func (c *Client) Version(ctx context.Context, req *agentv1.VersionRequest) (*age
 func (c *Client) Health(ctx context.Context, req *agentv1.AgentHealthRequest) (*agentv1.AgentHealthResponse, error) {
 	return c.ctl.Health(ctx, req)
 }
+
+// Update 下发 Agent 在线升级（STO-004，contract 1.4.0）。
+func (c *Client) Update(ctx context.Context, req *agentv1.AgentUpdateRequest) (*agentv1.AgentUpdateResponse, error) {
+	return c.ctl.Update(ctx, req)
+}

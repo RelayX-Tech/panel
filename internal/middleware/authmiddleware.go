@@ -43,7 +43,8 @@ func (m *AuthMiddleware) Handle(next http.HandlerFunc) http.HandlerFunc {
 			}
 			return
 		}
-		next(w, r.WithContext(auth.ContextWithSession(r.Context(), row)))
+		next(w, r.WithContext(auth.ContextWithSession(
+			contextWithClientIP(r.Context(), hostPart(r.RemoteAddr)), row)))
 	}
 }
 

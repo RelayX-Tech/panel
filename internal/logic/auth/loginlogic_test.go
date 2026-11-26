@@ -19,9 +19,8 @@ import (
 )
 
 type fakeUsers struct {
-	user  *model.User
-	err   error
-	users []*model.User
+	user *model.User
+	err  error
 
 	updatedHash   string
 	updateErr     error

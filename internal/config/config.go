@@ -160,7 +160,7 @@ func (c Config) Validate() error {
 		return errors.New("Auth.AllowedOrigins is required")
 	}
 	if c.Auth.SessionIdleTTL <= 0 || c.Auth.SessionAbsoluteTTL <= 0 {
-		return errors.New("Auth session TTLs must be positive")
+		return errors.New("auth session TTLs must be positive")
 	}
 	if c.Auth.SessionAbsoluteTTL < c.Auth.SessionIdleTTL {
 		return errors.New("Auth.SessionAbsoluteTTL must not be shorter than SessionIdleTTL")
@@ -173,7 +173,7 @@ func (c Config) Validate() error {
 	}
 	// 修改密码限流与 sqlcache 共用 Redis；缺失时无法保证 AC23/AC24/AC42。
 	if len(c.Cache) == 0 {
-		return errors.New("Cache (Redis) is required for password change rate limiting")
+		return errors.New("cache (Redis) is required for password change rate limiting")
 	}
 	return nil
 }

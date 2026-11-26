@@ -1,0 +1,24 @@
+version: "2"
+
+# Panel 后端 lint 基线（BE-14）。
+# 目标：`golangci-lint run` 在本机与 CI 均可执行并全绿。
+linters:
+  exclusions:
+    rules:
+      # go-zero 的 json 标签选项（optional/default）不是标准 encoding/json 选项，
+      # staticcheck SA5008 会误报（"invalid appearance of unknown ... tag option"）。
+      - linters:
+          - staticcheck
+        text: 'invalid appearance of unknown .* tag option'
+      # go-zero 的 `default=` 标签选项同样非标准 encoding/json 选项。
+      - linters:
+          - staticcheck
+        text: 'malformed .json. tag'
+      # 只读句柄 / 报告写入的 Close 返回值不可处理，排除 errcheck 噪音。
+      - linters:
+          - errcheck
+        source: '\.Close\(\)$'
+      # 覆盖率报告写入 os.Stdout 的返回值无需处理。
+      - linters:
+          - errcheck
+        source: 'fmt\.Fprint'

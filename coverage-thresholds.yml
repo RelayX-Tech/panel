@@ -1,0 +1,47 @@
+# 覆盖率门禁基线（棘轮）
+# 每包阈值 = 引入门禁时的当前覆盖率（向下取整到 0.1%），只升不降。
+# 覆盖率改进后运行 `task panel:coverage:update` 重新生成。
+# 排除 goctl 生成的薄适配层（internal/handler/**）与测试辅助（internal/testsupport）。
+default: 80
+exclude:
+    - internal/handler
+    - internal/testsupport
+packages:
+    internal/auth: 77.6
+    internal/client/agent: 13.3
+    internal/client/corecontrol: 13.3
+    internal/config: 84.2
+    internal/cryptobox: 77.7
+    internal/errcode: 84.8
+    internal/geo: 83.3
+    internal/grpcerror: 89.2
+    internal/health: 92.8
+    internal/logic/alerts: 60.7
+    internal/logic/audit: 96.6
+    internal/logic/auth: 85.4
+    internal/logic/clients: 82.3
+    internal/logic/dashboard: 83.7
+    internal/logic/dispatch: 89.5
+    internal/logic/monitoring: 73
+    internal/logic/nodes: 88.2
+    internal/logic/register: 88.7
+    internal/logic/settings: 57.7
+    internal/logic/shared: 0
+    internal/logic/system: 76.4
+    internal/logic/traffic: 60.8
+    internal/logic/upgrade: 94.5
+    internal/logic/ws: 0
+    internal/middleware: 84.8
+    internal/migrate: 83
+    internal/model: 51.8
+    internal/notify: 60
+    internal/observability: 100
+    internal/orchestrator: 81
+    internal/pki: 42.8
+    internal/requestid: 94.7
+    internal/response: 68
+    internal/server/registration: 54.6
+    internal/svc: 58.9
+    internal/upgrade: 47.1
+    internal/upgrader: 56.9
+    internal/ws: 49.5

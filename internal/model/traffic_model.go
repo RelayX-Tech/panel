@@ -81,17 +81,27 @@ func (m *PostgresTrafficModel) Rows(ctx context.Context, entityType string, from
 	case "connections":
 		order = " ORDER BY connections DESC, entity_id ASC"
 	}
-	query := `SELECT entity_type, entity_id,
-       sum(up_bytes)::bigint AS up_bytes,
-       sum(down_bytes)::bigint AS down_bytes,
-       sum(up_bytes + down_bytes)::bigint AS total_bytes,
-       max(connections)::int AS connections,
-       max(ts) AS last_updated_at
-FROM traffic_samples` + whereSQL + `
-GROUP BY entity_type, entity_id` + order + fmt.Sprintf(" LIMIT %d OFFSET %d", pageSize, (page-1)*pageSize)
+	// C19：objectName 回填实体显示名（端口组 / 节点 / 客户端），无法解析时回退 entity_id。
+	query := `SELECT g.entity_type, g.entity_id,
+       coalesce(pg.name, n.name, nullif(cs.email, ''), g.entity_id) AS object_name,
+       g.up_bytes, g.down_bytes, g.total_bytes, g.connections, g.last_updated_at
+FROM (
+    SELECT entity_type, entity_id,
+           sum(up_bytes)::bigint AS up_bytes,
+           sum(down_bytes)::bigint AS down_bytes,
+           sum(up_bytes + down_bytes)::bigint AS total_bytes,
+           max(connections)::int AS connections,
+           max(ts) AS last_updated_at
+    FROM traffic_samples` + whereSQL + `
+    GROUP BY entity_type, entity_id
+) g
+LEFT JOIN port_groups pg ON g.entity_type = 'port_group' AND pg.id = g.entity_id
+LEFT JOIN nodes n ON g.entity_type = 'node' AND n.id = g.entity_id
+LEFT JOIN client_stats cs ON g.entity_type = 'client' AND cs.client_id = g.entity_id` + order + fmt.Sprintf(" LIMIT %d OFFSET %d", pageSize, (page-1)*pageSize)
 	type row struct {
 		EntityType    string    `db:"entity_type"`
 		EntityId      string    `db:"entity_id"`
+		ObjectName    string    `db:"object_name"`
 		UpBytes       int64     `db:"up_bytes"`
 		DownBytes     int64     `db:"down_bytes"`
 		TotalBytes    int64     `db:"total_bytes"`
@@ -105,7 +115,7 @@ GROUP BY entity_type, entity_id` + order + fmt.Sprintf(" LIMIT %d OFFSET %d", pa
 	out := make([]TrafficRow, 0, len(rows))
 	for _, r := range rows {
 		out = append(out, TrafficRow{
-			ObjectType: r.EntityType, ObjectID: r.EntityId, ObjectName: r.EntityId,
+			ObjectType: r.EntityType, ObjectID: r.EntityId, ObjectName: r.ObjectName,
 			UpBytes: r.UpBytes, DownBytes: r.DownBytes, TotalBytes: r.TotalBytes,
 			Connections: r.Connections, LastUpdatedAt: r.LastUpdatedAt,
 		})

@@ -108,7 +108,7 @@ func NewServiceContext(c config.Config, conn sqlx.SqlConn, cacheConf cache.Cache
 	var passwordLimiter auth.PasswordLimiterStore
 	if len(cacheConf) > 0 {
 		passwordLimiter = auth.NewPasswordLimiter(
-			cacheConf[0].RedisConf.NewRedis(),
+			cacheConf[0].NewRedis(),
 			c.Auth.PasswordChangeRateLimit.Window,
 			c.Auth.PasswordChangeRateLimit.MaxAttempts,
 		)
@@ -117,7 +117,7 @@ func NewServiceContext(c config.Config, conn sqlx.SqlConn, cacheConf cache.Cache
 	// 健康检查（AC85）需要独立的 Redis 连通性探测。
 	var redisPinger RedisPinger
 	if len(cacheConf) > 0 {
-		redisPinger = cacheConf[0].RedisConf.NewRedis()
+		redisPinger = cacheConf[0].NewRedis()
 	}
 
 	coreControl, agentClient := dialDispatchClients(c)
@@ -223,10 +223,7 @@ func hostnameOr(fallback string) string {
 
 // contractMinor 取 "1.4.0" 的 minor 段。
 func contractMinor(version string) string {
-	parts := make([]string, 0, 3)
-	for _, p := range strings.Split(version, ".") {
-		parts = append(parts, p)
-	}
+	parts := strings.Split(version, ".")
 	if len(parts) >= 2 {
 		if _, err := strconv.Atoi(parts[1]); err == nil {
 			return parts[1]

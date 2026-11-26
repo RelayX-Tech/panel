@@ -11,8 +11,6 @@ import (
 	"github.com/relayx-tech/panel/internal/config"
 )
 
-const swaggerArtifact = "../../docs/openapi/panel.swagger.json"
-
 func projectRoot(t *testing.T) string {
 	t.Helper()
 	abs, err := filepath.Abs("../..")

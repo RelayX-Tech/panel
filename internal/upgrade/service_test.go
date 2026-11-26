@@ -180,7 +180,6 @@ func (f *fakeAlerts) Upsert(_ context.Context, a model.Alert) (*model.Alert, err
 type fakeAgents struct {
 	updates []upgrade.AgentUpdateRequest
 	failOn  map[string]bool
-	status  string
 }
 
 func (f *fakeAgents) Update(_ context.Context, req upgrade.AgentUpdateRequest) (upgrade.AgentUpdateResult, error) {

@@ -71,10 +71,6 @@ func (l *GeoFileUploadLogic) Upload(filename, source string, data []byte) (*type
 	if err := os.MkdirAll(dir, 0o750); err != nil {
 		return nil, response.Internal(err)
 	}
-	kind := strings.TrimSuffix(filepath.Base(filename), ext)
-	if kind == "" {
-		kind = "custom"
-	}
 	path := filepath.Join(dir, uuid.NewString()+ext)
 	if err := os.WriteFile(path, data, 0o640); err != nil {
 		return nil, response.Internal(err)

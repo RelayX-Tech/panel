@@ -22,7 +22,6 @@ type fakeApplier struct {
 	mu       sync.Mutex
 	applied  []upgrader.Request
 	rollback []upgrader.Request
-	fail     bool
 }
 
 func (f *fakeApplier) Apply(_ context.Context, req upgrader.Request) error {

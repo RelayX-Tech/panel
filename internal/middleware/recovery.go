@@ -1,6 +1,8 @@
 package middleware
 
 import (
+	"bufio"
+	"net"
 	"net/http"
 	"time"
 
@@ -75,4 +77,20 @@ func (s *statusRecorder) Flush() {
 	if f, ok := s.ResponseWriter.(http.Flusher); ok {
 		f.Flush()
 	}
+}
+
+// Unwrap 暴露底层 writer，使 http.ResponseController 能穿透包装
+// 查找 Hijacker / Flusher 等可选能力（go1.20+）。
+func (s *statusRecorder) Unwrap() http.ResponseWriter {
+	return s.ResponseWriter
+}
+
+// Hijack 透传连接接管，供 WebSocket 升级使用（C18）。
+// gorilla/websocket 经 http.NewResponseController(w).Hijack() 调用；若包装
+// 不透传，控制器会返回 http.ErrNotSupported（"feature not supported"）。
+func (s *statusRecorder) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+	if h, ok := s.ResponseWriter.(http.Hijacker); ok {
+		return h.Hijack()
+	}
+	return nil, nil, http.ErrNotSupported
 }

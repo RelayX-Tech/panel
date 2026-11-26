@@ -12,8 +12,8 @@ import (
 	systemlogic "github.com/relayx-tech/panel/internal/logic/system"
 	"github.com/relayx-tech/panel/internal/model"
 	"github.com/relayx-tech/panel/internal/response"
-	panelsystem "github.com/relayx-tech/panel/internal/system"
 	"github.com/relayx-tech/panel/internal/svc"
+	panelsystem "github.com/relayx-tech/panel/internal/system"
 )
 
 type fakeNodeModel struct {
